@@ -1,0 +1,229 @@
+-- Sample 144: SET Statements Comprehensive Coverage
+-- Category: Missing Syntax Elements / Syntax Edge Cases
+-- Complexity: Complex
+-- Purpose: Parser testing - all SET statement variations
+-- Features: Session settings, ANSI settings, statistics, identity, locks
+
+-- Pattern 1: Basic SET for variables
+DECLARE @x INT, @y INT, @z INT;
+SET @x = 10;
+SET @y = @x * 2;
+SET @z = (SELECT MAX(ID) FROM dbo.SomeTable);
+SELECT @x, @y, @z;
+GO
+
+-- Pattern 2: SET vs SELECT for assignment
+DECLARE @Val1 INT, @Val2 INT;
+
+-- SET can only assign one variable at a time
+SET @Val1 = 100;
+SET @Val2 = 200;
+
+-- SELECT can assign multiple
+SELECT @Val1 = 100, @Val2 = 200;
+
+-- SELECT with query (if multiple rows, gets last value)
+SELECT @Val1 = ID FROM dbo.SomeTable;  -- Gets last ID
+GO
+
+-- Pattern 3: ANSI settings
+SET ANSI_NULLS ON;
+SET ANSI_NULLS OFF;
+
+SET ANSI_PADDING ON;
+SET ANSI_PADDING OFF;
+
+SET ANSI_WARNINGS ON;
+SET ANSI_WARNINGS OFF;
+
+SET ANSI_DEFAULTS ON;  -- Sets multiple ANSI options
+SET ANSI_DEFAULTS OFF;
+
+SET ARITHABORT ON;
+SET ARITHABORT OFF;
+
+SET ARITHIGNORE ON;
+SET ARITHIGNORE OFF;
+
+SET CONCAT_NULL_YIELDS_NULL ON;
+SET CONCAT_NULL_YIELDS_NULL OFF;
+
+SET NUMERIC_ROUNDABORT ON;
+SET NUMERIC_ROUNDABORT OFF;
+
+SET QUOTED_IDENTIFIER ON;
+SET QUOTED_IDENTIFIER OFF;
+GO
+
+-- Pattern 4: Query execution settings
+SET NOCOUNT ON;
+SET NOCOUNT OFF;
+
+SET NOEXEC ON;   -- Parse and compile but don't execute
+SET NOEXEC OFF;
+
+SET PARSEONLY ON;  -- Parse only
+SET PARSEONLY OFF;
+
+SET FMTONLY ON;   -- Return metadata only (deprecated)
+SET FMTONLY OFF;
+
+SET SHOWPLAN_ALL ON;  -- Show execution plan
+SET SHOWPLAN_ALL OFF;
+
+SET SHOWPLAN_TEXT ON;
+SET SHOWPLAN_TEXT OFF;
+
+SET SHOWPLAN_XML ON;
+SET SHOWPLAN_XML OFF;
+
+SET STATISTICS IO ON;
+SET STATISTICS IO OFF;
+
+SET STATISTICS TIME ON;
+SET STATISTICS TIME OFF;
+
+SET STATISTICS PROFILE ON;
+SET STATISTICS PROFILE OFF;
+
+SET STATISTICS XML ON;
+SET STATISTICS XML OFF;
+GO
+
+-- Pattern 5: Transaction isolation
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+SET TRANSACTION ISOLATION LEVEL SNAPSHOT;
+GO
+
+-- Pattern 6: Lock timeout
+SET LOCK_TIMEOUT 5000;  -- 5 seconds
+SET LOCK_TIMEOUT -1;    -- Wait indefinitely
+SET LOCK_TIMEOUT 0;     -- Don't wait at all
+GO
+
+-- Pattern 7: Row count and identity
+SET ROWCOUNT 100;    -- Limit rows affected (deprecated for SELECT)
+SET ROWCOUNT 0;      -- No limit
+
+SET IDENTITY_INSERT dbo.MyTable ON;
+-- INSERT INTO dbo.MyTable (ID, Name) VALUES (100, 'Manual ID');
+SET IDENTITY_INSERT dbo.MyTable OFF;
+GO
+
+-- Pattern 8: Date and language settings
+SET DATEFIRST 1;   -- Monday is first day
+SET DATEFIRST 7;   -- Sunday is first day (US default)
+
+SET DATEFORMAT mdy;  -- Month-Day-Year
+SET DATEFORMAT dmy;  -- Day-Month-Year
+SET DATEFORMAT ymd;  -- Year-Month-Day
+
+SET LANGUAGE 'us_english';
+SET LANGUAGE 'British';
+SET LANGUAGE 'German';
+GO
+
+-- Pattern 9: Text and image settings
+SET TEXTSIZE 2147483647;  -- Max text size
+SET TEXTSIZE 0;           -- Default (4KB)
+GO
+
+-- Pattern 10: Cursor settings
+SET CURSOR_CLOSE_ON_COMMIT ON;
+SET CURSOR_CLOSE_ON_COMMIT OFF;
+
+DECLARE @CursorCount INT;
+SET @CursorCount = @@CURSOR_ROWS;
+GO
+
+-- Pattern 11: Implicit transactions
+SET IMPLICIT_TRANSACTIONS ON;
+-- Every statement starts a transaction
+SELECT 1;
+COMMIT;
+
+SET IMPLICIT_TRANSACTIONS OFF;
+GO
+
+-- Pattern 12: XACT_ABORT
+SET XACT_ABORT ON;   -- Transaction aborts on error
+SET XACT_ABORT OFF;  -- Errors may not abort transaction
+GO
+
+-- Pattern 13: Remote procedure settings
+SET REMOTE_PROC_TRANSACTIONS ON;
+SET REMOTE_PROC_TRANSACTIONS OFF;
+GO
+
+-- Pattern 14: Query governor
+SET QUERY_GOVERNOR_COST_LIMIT 100;  -- Max estimated cost
+SET QUERY_GOVERNOR_COST_LIMIT 0;    -- No limit
+GO
+
+-- Pattern 15: Deadlock priority
+SET DEADLOCK_PRIORITY LOW;
+SET DEADLOCK_PRIORITY NORMAL;
+SET DEADLOCK_PRIORITY HIGH;
+SET DEADLOCK_PRIORITY -10;  -- Numeric, -10 to 10
+SET DEADLOCK_PRIORITY 10;
+GO
+
+-- Pattern 16: Context info
+DECLARE @ContextInfo VARBINARY(128) = CAST('UserSession123' AS VARBINARY(128));
+SET CONTEXT_INFO @ContextInfo;
+SELECT CONTEXT_INFO() AS CurrentContext;
+GO
+
+-- Pattern 17: OFFSETS (for client cursor libraries)
+SET OFFSETS SELECT ON;
+SET OFFSETS SELECT OFF;
+GO
+
+-- Pattern 18: Checking current settings
+SELECT 
+    @@OPTIONS AS OptionsBitmap,
+    CASE WHEN @@OPTIONS & 1 = 1 THEN 'ON' ELSE 'OFF' END AS DISABLE_DEF_CNST_CHK,
+    CASE WHEN @@OPTIONS & 2 = 2 THEN 'ON' ELSE 'OFF' END AS IMPLICIT_TRANSACTIONS,
+    CASE WHEN @@OPTIONS & 4 = 4 THEN 'ON' ELSE 'OFF' END AS CURSOR_CLOSE_ON_COMMIT,
+    CASE WHEN @@OPTIONS & 8 = 8 THEN 'ON' ELSE 'OFF' END AS ANSI_WARNINGS,
+    CASE WHEN @@OPTIONS & 16 = 16 THEN 'ON' ELSE 'OFF' END AS ANSI_PADDING,
+    CASE WHEN @@OPTIONS & 32 = 32 THEN 'ON' ELSE 'OFF' END AS ANSI_NULLS,
+    CASE WHEN @@OPTIONS & 64 = 64 THEN 'ON' ELSE 'OFF' END AS ARITHABORT,
+    CASE WHEN @@OPTIONS & 128 = 128 THEN 'ON' ELSE 'OFF' END AS ARITHIGNORE,
+    CASE WHEN @@OPTIONS & 256 = 256 THEN 'ON' ELSE 'OFF' END AS QUOTED_IDENTIFIER,
+    CASE WHEN @@OPTIONS & 512 = 512 THEN 'ON' ELSE 'OFF' END AS NOCOUNT,
+    CASE WHEN @@OPTIONS & 1024 = 1024 THEN 'ON' ELSE 'OFF' END AS ANSI_NULL_DFLT_ON,
+    CASE WHEN @@OPTIONS & 2048 = 2048 THEN 'ON' ELSE 'OFF' END AS ANSI_NULL_DFLT_OFF,
+    CASE WHEN @@OPTIONS & 4096 = 4096 THEN 'ON' ELSE 'OFF' END AS CONCAT_NULL_YIELDS_NULL,
+    CASE WHEN @@OPTIONS & 8192 = 8192 THEN 'ON' ELSE 'OFF' END AS NUMERIC_ROUNDABORT,
+    CASE WHEN @@OPTIONS & 16384 = 16384 THEN 'ON' ELSE 'OFF' END AS XACT_ABORT;
+GO
+
+-- Pattern 19: Multiple SET in single batch (common pattern)
+SET NOCOUNT ON;
+SET XACT_ABORT ON;
+SET ANSI_NULLS ON;
+SET QUOTED_IDENTIFIER ON;
+SET ARITHABORT ON;
+SET CONCAT_NULL_YIELDS_NULL ON;
+SET ANSI_WARNINGS ON;
+SET ANSI_PADDING ON;
+GO
+
+-- Pattern 20: SET in stored procedure
+CREATE PROCEDURE dbo.StandardSettings
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+    
+    -- Procedure body
+    SELECT 'Settings applied' AS Status;
+END;
+GO
+
+DROP PROCEDURE IF EXISTS dbo.StandardSettings;
+GO
