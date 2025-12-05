@@ -2305,9 +2305,9 @@ func (p *Parser) parseTableReference() ast.TableReference {
 				p.expectPeek(token.RPAREN)
 			}
 
-			// Check for OPENJSON WITH schema clause
-			isOpenJson := funcName == "OPENJSON"
-			if isOpenJson && p.peekTokenIs(token.WITH) {
+			// Check for OPENJSON/OPENXML WITH schema clause
+			isOpenJsonOrXml := funcName == "OPENJSON" || funcName == "OPENXML"
+			if isOpenJsonOrXml && p.peekTokenIs(token.WITH) {
 				p.nextToken() // consume WITH
 				if p.expectPeek(token.LPAREN) {
 					tvf.OpenJsonColumns = p.parseOpenJsonColumns()
@@ -2793,8 +2793,9 @@ func (p *Parser) parseTableSample() *ast.TableSampleClause {
 	return ts
 }
 
-// parseOpenJsonColumns parses the column definitions in OPENJSON WITH clause
-// Syntax: col_name datatype ['$.path'] [AS JSON], ...
+// parseOpenJsonColumns parses the column definitions in OPENJSON/OPENXML WITH clause
+// OPENJSON syntax: col_name datatype ['$.path'] [AS JSON], ...
+// OPENXML syntax: col_name datatype ['@attr' or 'element'], ...
 func (p *Parser) parseOpenJsonColumns() []*ast.OpenJsonColumn {
 	var columns []*ast.OpenJsonColumn
 

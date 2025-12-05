@@ -7062,3 +7062,44 @@ func TestValidSyntaxNotFlagged(t *testing.T) {
 		}
 	}
 }
+
+func TestOpenXmlWithClause(t *testing.T) {
+	tests := []struct {
+		input string
+		desc  string
+	}{
+		{
+			`SELECT * FROM OPENXML(@idoc, '/root/item', 2) WITH (ID INT '@id', Name NVARCHAR(50) 'name')`,
+			"OPENXML with attribute and element paths",
+		},
+		{
+			`SELECT * FROM OPENXML(@idoc, '/employees/employee', 2)
+			 WITH (
+				EmployeeId INT '@id',
+				FirstName NVARCHAR(50) 'firstName',
+				LastName NVARCHAR(50) 'lastName',
+				Salary DECIMAL(10,2) 'salary'
+			 )`,
+			"OPENXML with multiple columns",
+		},
+		{
+			`SELECT * FROM OPENXML(@idoc, '/root', 1) WITH (Value VARCHAR(100) '.')`,
+			"OPENXML with text node path",
+		},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+
+		if len(p.Errors()) > 0 {
+			t.Errorf("%s: parse error: %s", tt.desc, p.Errors()[0])
+			continue
+		}
+
+		if len(program.Statements) == 0 {
+			t.Errorf("%s: no statements parsed", tt.desc)
+		}
+	}
+}
