@@ -541,8 +541,8 @@ END
 
 func TestLikeExpression(t *testing.T) {
 	tests := []struct {
-		input    string
-		hasNot   bool
+		input     string
+		hasNot    bool
 		hasEscape bool
 	}{
 		{"SELECT * FROM t WHERE name LIKE '%test%'", false, false},
@@ -1846,10 +1846,10 @@ func TestMergeWithSubquerySource(t *testing.T) {
 
 func TestCreateView(t *testing.T) {
 	tests := []struct {
-		name        string
-		input       string
-		hasColumns  bool
-		hasOptions  bool
+		name       string
+		input      string
+		hasColumns bool
+		hasOptions bool
 	}{
 		{"Basic VIEW", `CREATE VIEW vwUsers AS SELECT ID, Name FROM Users`, false, false},
 		{"VIEW with columns", `CREATE VIEW vwUsers (UserID, UserName) AS SELECT ID, Name FROM Users`, true, false},
@@ -2070,9 +2070,9 @@ func TestUnion(t *testing.T) {
 
 func TestIntersectExcept(t *testing.T) {
 	tests := []struct {
-		name     string
-		input    string
-		opType   string
+		name   string
+		input  string
+		opType string
 	}{
 		{"INTERSECT", `SELECT A FROM T1 INTERSECT SELECT A FROM T2`, "INTERSECT"},
 		{"EXCEPT", `SELECT A FROM T1 EXCEPT SELECT A FROM T2`, "EXCEPT"},
@@ -2380,10 +2380,10 @@ func TestConvertExpression(t *testing.T) {
 
 func TestForXmlClause(t *testing.T) {
 	tests := []struct {
-		input    string
-		forType  string
-		mode     string
-		hasRoot  bool
+		input   string
+		forType string
+		mode    string
+		hasRoot bool
 	}{
 		{"SELECT * FROM T FOR XML RAW", "XML", "RAW", false},
 		{"SELECT * FROM T FOR XML AUTO", "XML", "AUTO", false},
@@ -2516,7 +2516,7 @@ func TestPivotTable(t *testing.T) {
 
 func TestUnpivotTable(t *testing.T) {
 	input := "SELECT * FROM PivotedSales UNPIVOT (Amount FOR Quarter IN ([Q1], [Q2], [Q3], [Q4])) AS U"
-	
+
 	l := lexer.New(input)
 	p := New(l)
 	program := p.ParseProgram()
@@ -3315,8 +3315,8 @@ func TestDenyStatement(t *testing.T) {
 
 func TestExecWithResultSets(t *testing.T) {
 	tests := []struct {
-		input    string
-		numSets  int
+		input   string
+		numSets int
 	}{
 		{`EXEC dbo.GetData WITH RESULT SETS ((Id INT, Name NVARCHAR(100)))`, 1},
 		{`EXEC dbo.GetData WITH RESULT SETS ((Id INT), (Name NVARCHAR(50)))`, 2},
@@ -4673,7 +4673,6 @@ func TestGroupingFunction(t *testing.T) {
 	}
 }
 
-
 func TestKeywordAsAlias(t *testing.T) {
 	tests := []struct {
 		input string
@@ -4724,10 +4723,9 @@ func TestKeywordAsAlias(t *testing.T) {
 	}
 }
 
-
 func TestExecWithReturnVariable(t *testing.T) {
 	tests := []struct {
-		input    string
+		input     string
 		hasReturn bool
 	}{
 		{`EXEC @rc = sp_test`, true},
@@ -4763,7 +4761,7 @@ func TestExecWithReturnVariable(t *testing.T) {
 
 func TestSetOperationsWithString(t *testing.T) {
 	tests := []struct {
-		input    string
+		input     string
 		unionType string
 	}{
 		{`SELECT a FROM t1 UNION SELECT a FROM t2`, "UNION"},
@@ -4814,16 +4812,16 @@ func TestTriggerWithEncryption(t *testing.T) {
 	p := New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
-	
+
 	if len(program.Statements) != 1 {
 		t.Fatalf("expected 1 statement, got %d", len(program.Statements))
 	}
-	
+
 	stmt, ok := program.Statements[0].(*ast.CreateTriggerStatement)
 	if !ok {
 		t.Fatalf("expected CreateTriggerStatement, got %T", program.Statements[0])
 	}
-	
+
 	if len(stmt.Options) != 1 || stmt.Options[0] != "ENCRYPTION" {
 		t.Errorf("expected Options [ENCRYPTION], got %v", stmt.Options)
 	}
@@ -4835,20 +4833,20 @@ func TestColumnSetForAllSparseColumns(t *testing.T) {
 	p := New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
-	
+
 	if len(program.Statements) != 1 {
 		t.Fatalf("expected 1 statement, got %d", len(program.Statements))
 	}
-	
+
 	stmt, ok := program.Statements[0].(*ast.CreateTableStatement)
 	if !ok {
 		t.Fatalf("expected CreateTableStatement, got %T", program.Statements[0])
 	}
-	
+
 	if len(stmt.Columns) != 2 {
 		t.Fatalf("expected 2 columns, got %d", len(stmt.Columns))
 	}
-	
+
 	if !stmt.Columns[1].IsColumnSet {
 		t.Error("expected column 2 to have IsColumnSet = true")
 	}
@@ -4871,18 +4869,18 @@ func TestGrantWithColumnList(t *testing.T) {
 			[]string{"Email", "Phone"},
 		},
 	}
-	
+
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
 		p := New(l)
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
-		
+
 		stmt, ok := program.Statements[0].(*ast.GrantStatement)
 		if !ok {
 			t.Fatalf("expected GrantStatement, got %T", program.Statements[0])
 		}
-		
+
 		if len(stmt.Columns) != len(tt.columns) {
 			t.Errorf("expected %d columns, got %d", len(tt.columns), len(stmt.Columns))
 		}
@@ -4895,12 +4893,12 @@ func TestDenyWithColumnList(t *testing.T) {
 	p := New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
-	
+
 	stmt, ok := program.Statements[0].(*ast.DenyStatement)
 	if !ok {
 		t.Fatalf("expected DenyStatement, got %T", program.Statements[0])
 	}
-	
+
 	if len(stmt.Columns) != 2 {
 		t.Errorf("expected 2 columns, got %d", len(stmt.Columns))
 	}
@@ -4915,7 +4913,7 @@ func TestQueryOptionHints(t *testing.T) {
 		`SELECT * FROM t OPTION (MAX_GRANT_PERCENT = 25)`,
 		`SELECT * FROM t OPTION (USE PLAN @plan)`,
 	}
-	
+
 	for _, input := range tests {
 		l := lexer.New(input)
 		p := New(l)
@@ -4936,18 +4934,18 @@ func TestDropTriggerOnDatabase(t *testing.T) {
 		{`DROP TRIGGER IF EXISTS trg_Test ON ALL SERVER`, false, true},
 		{`DROP TRIGGER trg_Test`, false, false},
 	}
-	
+
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
 		p := New(l)
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
-		
+
 		stmt, ok := program.Statements[0].(*ast.DropObjectStatement)
 		if !ok {
 			t.Fatalf("expected DropObjectStatement, got %T", program.Statements[0])
 		}
-		
+
 		if stmt.OnDatabase != tt.onDatabase {
 			t.Errorf("OnDatabase: expected %v, got %v", tt.onDatabase, stmt.OnDatabase)
 		}
@@ -4963,12 +4961,12 @@ func TestCreateTableWithFilegroup(t *testing.T) {
 	p := New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
-	
+
 	stmt, ok := program.Statements[0].(*ast.CreateTableStatement)
 	if !ok {
 		t.Fatalf("expected CreateTableStatement, got %T", program.Statements[0])
 	}
-	
+
 	if stmt.FileGroup != "PRIMARY" && stmt.FileGroup != "[PRIMARY]" {
 		t.Errorf("expected FileGroup [PRIMARY], got %s", stmt.FileGroup)
 	}
@@ -4984,12 +4982,12 @@ func TestCreateTableWithFilegroupV2(t *testing.T) {
 	p := New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
-	
+
 	stmt, ok := program.Statements[0].(*ast.CreateTableStatement)
 	if !ok {
 		t.Fatalf("expected CreateTableStatement, got %T", program.Statements[0])
 	}
-	
+
 	// FileGroup should be captured (may or may not include brackets)
 	if stmt.FileGroup == "" {
 		t.Error("expected FileGroup to be set")
@@ -5005,18 +5003,18 @@ func TestDeleteWithTableHints(t *testing.T) {
 		{`DELETE FROM dbo.Orders WITH (ROWLOCK, READPAST) WHERE ID = 1`, []string{"ROWLOCK", "READPAST"}},
 		{`DELETE FROM dbo.Orders WHERE ID = 1`, nil},
 	}
-	
+
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
 		p := New(l)
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
-		
+
 		stmt, ok := program.Statements[0].(*ast.DeleteStatement)
 		if !ok {
 			t.Fatalf("expected DeleteStatement, got %T", program.Statements[0])
 		}
-		
+
 		if len(stmt.Hints) != len(tt.hints) {
 			t.Errorf("expected %d hints, got %d", len(tt.hints), len(stmt.Hints))
 		}
@@ -5029,7 +5027,7 @@ func TestNextValueForWithOver(t *testing.T) {
 	p := New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
-	
+
 	if len(program.Statements) != 1 {
 		t.Fatalf("expected 1 statement, got %d", len(program.Statements))
 	}
@@ -5041,12 +5039,12 @@ func TestGrantOnXmlSchemaCollection(t *testing.T) {
 	p := New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
-	
+
 	stmt, ok := program.Statements[0].(*ast.GrantStatement)
 	if !ok {
 		t.Fatalf("expected GrantStatement, got %T", program.Statements[0])
 	}
-	
+
 	if stmt.OnType != "XML SCHEMA COLLECTION" {
 		t.Errorf("expected OnType 'XML SCHEMA COLLECTION', got '%s'", stmt.OnType)
 	}
@@ -5058,12 +5056,12 @@ func TestGrantOnAsymmetricKey(t *testing.T) {
 	p := New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
-	
+
 	stmt, ok := program.Statements[0].(*ast.GrantStatement)
 	if !ok {
 		t.Fatalf("expected GrantStatement, got %T", program.Statements[0])
 	}
-	
+
 	if stmt.OnType != "ASYMMETRIC KEY" {
 		t.Errorf("expected OnType 'ASYMMETRIC KEY', got '%s'", stmt.OnType)
 	}
@@ -5071,25 +5069,25 @@ func TestGrantOnAsymmetricKey(t *testing.T) {
 
 func TestTruncateTableWithPartitions(t *testing.T) {
 	tests := []struct {
-		input      string
-		partCount  int
+		input     string
+		partCount int
 	}{
 		{`TRUNCATE TABLE dbo.MyTable`, 0},
 		{`TRUNCATE TABLE dbo.T WITH (PARTITIONS (1, 2, 3))`, 3},
 		{`TRUNCATE TABLE dbo.T WITH (PARTITIONS (5 TO 10))`, 1},
 	}
-	
+
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
 		p := New(l)
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
-		
+
 		stmt, ok := program.Statements[0].(*ast.TruncateTableStatement)
 		if !ok {
 			t.Fatalf("expected TruncateTableStatement, got %T", program.Statements[0])
 		}
-		
+
 		if len(stmt.Partitions) != tt.partCount {
 			t.Errorf("expected %d partitions, got %d", tt.partCount, len(stmt.Partitions))
 		}
@@ -5108,7 +5106,7 @@ func TestCompoundTokens(t *testing.T) {
 		{`GRANT CONTROL ON SYMMETRIC KEY::MyKey TO User1`, "SYMMETRIC_KEY"},
 		{`END CONVERSATION @handle`, "END_CONVERSATION"},
 	}
-	
+
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
 		p := New(l)
@@ -5125,7 +5123,7 @@ func TestBeginAtomicInFunction(t *testing.T) {
 	p := New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
-	
+
 	if len(program.Statements) != 1 {
 		t.Fatalf("expected 1 statement, got %d", len(program.Statements))
 	}
@@ -5137,12 +5135,12 @@ func TestCreateXmlSchemaCollection(t *testing.T) {
 	p := New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
-	
+
 	stmt, ok := program.Statements[0].(*ast.CreateXmlSchemaCollectionStatement)
 	if !ok {
 		t.Fatalf("expected CreateXmlSchemaCollectionStatement, got %T", program.Statements[0])
 	}
-	
+
 	if stmt.Name.String() != "dbo.MySchema" {
 		t.Errorf("expected name 'dbo.MySchema', got '%s'", stmt.Name.String())
 	}
@@ -5156,7 +5154,7 @@ func TestJsonObjectColonSyntax(t *testing.T) {
 		{`SELECT JSON_OBJECT('id':1, 'name':'John', 'active':CAST(1 AS BIT)) AS JsonObj`},
 		{`SELECT JSON_ARRAY(1, 2, 3, 'four', NULL) AS JsonArr`},
 	}
-	
+
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
 		p := New(l)
@@ -5174,7 +5172,7 @@ func TestInlineIndex(t *testing.T) {
 		{`CREATE TABLE t (CustomerID INT INDEX IX_Customer NONCLUSTERED)`},
 		{`CREATE TABLE t (ID INT, INDEX IX_Date NONCLUSTERED (OrderDate, Amount))`},
 	}
-	
+
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
 		p := New(l)
@@ -5193,7 +5191,7 @@ func TestParenthesizedSetOperations(t *testing.T) {
 		{`(SELECT a FROM t1) EXCEPT SELECT b FROM t2`},
 		{`SELECT a FROM t1 INTERSECT SELECT b FROM t2`},
 	}
-	
+
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
 		p := New(l)
@@ -6843,16 +6841,16 @@ func TestErrorMessageContainsLineAndColumn(t *testing.T) {
 	// Error messages should include position information
 	input := `SELECT *
 FROM T
-WHERE = 1`  // Error on line 3
+WHERE = 1` // Error on line 3
 
 	l := lexer.New(input)
 	p := New(l)
 	p.ParseProgram()
-	
+
 	if len(p.Errors()) == 0 {
 		t.Fatal("expected parse error")
 	}
-	
+
 	errMsg := p.Errors()[0]
 	// Error should mention line number
 	if !strings.Contains(errMsg, "line") {
@@ -6869,19 +6867,19 @@ func TestErrorMessageDescribesExpected(t *testing.T) {
 		input    string
 		expected string // substring that should appear in error
 	}{
-		{`INSERT INTO T VALUES`, "expected"},    // Should describe expectation
+		{`INSERT INTO T VALUES`, "expected"}, // Should describe expectation
 	}
 
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
 		p := New(l)
 		p.ParseProgram()
-		
+
 		if len(p.Errors()) == 0 {
 			t.Errorf("expected parse error for %q", tt.input)
 			continue
 		}
-		
+
 		errMsg := p.Errors()[0]
 		if !strings.Contains(strings.ToLower(errMsg), tt.expected) {
 			t.Errorf("error for %q should contain %q: got %s", tt.input, tt.expected, errMsg)
@@ -6893,11 +6891,11 @@ func TestMultipleErrorsReported(t *testing.T) {
 	// Parser should be able to report multiple errors (not just first one)
 	// Note: Our parser typically stops at first error, but let's verify it reports at least one
 	input := `SELECT * FROM WHERE ORDER BY`
-	
+
 	l := lexer.New(input)
 	p := New(l)
 	p.ParseProgram()
-	
+
 	if len(p.Errors()) == 0 {
 		t.Error("expected at least one parse error")
 	}
@@ -6917,7 +6915,7 @@ func TestErrorOnEmptyStatements(t *testing.T) {
 		l := lexer.New(tt.input)
 		p := New(l)
 		program := p.ParseProgram()
-		
+
 		// Either should produce error or produce empty/minimal AST
 		// Not a hard error, but let's document behaviour
 		if len(p.Errors()) == 0 && len(program.Statements) > 2 {

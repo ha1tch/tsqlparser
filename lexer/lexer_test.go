@@ -315,10 +315,10 @@ func TestBracketedIdentifiers(t *testing.T) {
 	}{
 		{"[TableName]", "TableName"},
 		{"[Column Name]", "Column Name"},
-		{"[SELECT]", "SELECT"},         // Reserved word as identifier
+		{"[SELECT]", "SELECT"},           // Reserved word as identifier
 		{"[My Table!@#]", "My Table!@#"}, // Special characters
-		{"[123Start]", "123Start"},      // Starts with number
-		{"[]", ""},                      // Empty (edge case)
+		{"[123Start]", "123Start"},       // Starts with number
+		{"[]", ""},                       // Empty (edge case)
 	}
 
 	for _, tt := range tests {
@@ -363,13 +363,13 @@ func TestStringLiteralsExtended(t *testing.T) {
 	}{
 		// Basic strings
 		{"'hello'", token.STRING, "hello"},
-		{"''", token.STRING, ""},                    // Empty string
-		{"'   '", token.STRING, "   "},              // Whitespace only
+		{"''", token.STRING, ""},       // Empty string
+		{"'   '", token.STRING, "   "}, // Whitespace only
 		// Escaped quotes
 		{"'it''s'", token.STRING, "it's"},
 		{"'don''t'", token.STRING, "don't"},
-		{"''''", token.STRING, "'"},                 // Just an escaped quote
-		{"'a''b''c'", token.STRING, "a'b'c"},        // Multiple escapes
+		{"''''", token.STRING, "'"},          // Just an escaped quote
+		{"'a''b''c'", token.STRING, "a'b'c"}, // Multiple escapes
 		// Unicode strings
 		{"N'hello'", token.NSTRING, "hello"},
 		{"N''", token.NSTRING, ""},
@@ -587,11 +587,11 @@ FROM t`
 		col  int
 	}{
 		{token.SELECT, 1, 1},
-		{token.IDENT, 2, 3},  // col1
+		{token.IDENT, 2, 3}, // col1
 		{token.COMMA, 2, 7},
-		{token.IDENT, 3, 3},  // col2
+		{token.IDENT, 3, 3}, // col2
 		{token.FROM, 4, 1},
-		{token.IDENT, 4, 6},  // t
+		{token.IDENT, 4, 6}, // t
 	}
 
 	for i, e := range expected {

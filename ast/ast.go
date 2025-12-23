@@ -328,10 +328,10 @@ func (ee *ExistsExpression) String() string {
 
 // CaseExpression represents a CASE expression.
 type CaseExpression struct {
-	Token      token.Token
-	Operand    Expression   // Optional: CASE operand WHEN ...
+	Token       token.Token
+	Operand     Expression // Optional: CASE operand WHEN ...
 	WhenClauses []*WhenClause
-	ElseClause Expression
+	ElseClause  Expression
 }
 
 type WhenClause struct {
@@ -574,13 +574,13 @@ type OverClause struct {
 
 func (oc *OverClause) String() string {
 	var out strings.Builder
-	
+
 	if oc.WindowRef != "" {
 		out.WriteString("OVER ")
 		out.WriteString(oc.WindowRef)
 		return out.String()
 	}
-	
+
 	out.WriteString("OVER (")
 
 	if len(oc.PartitionBy) > 0 {
@@ -615,9 +615,9 @@ func (oc *OverClause) String() string {
 
 // WindowFrame represents a window frame specification (ROWS/RANGE BETWEEN).
 type WindowFrame struct {
-	Type       string      // ROWS or RANGE
-	Start      *FrameBound
-	End        *FrameBound // nil if not BETWEEN
+	Type  string // ROWS or RANGE
+	Start *FrameBound
+	End   *FrameBound // nil if not BETWEEN
 }
 
 func (wf *WindowFrame) String() string {
@@ -874,9 +874,9 @@ func (ss *SelectStatement) String() string {
 
 // QueryOption represents a query hint in OPTION clause
 type QueryOption struct {
-	Name        string       // RECOMPILE, MAXDOP, HASH JOIN, USE HINT, OPTIMIZE FOR, etc.
-	Value       Expression   // Optional value (e.g., 4 for MAXDOP 4)
-	Hints       []string     // For USE HINT('hint1', 'hint2')
+	Name        string             // RECOMPILE, MAXDOP, HASH JOIN, USE HINT, OPTIMIZE FOR, etc.
+	Value       Expression         // Optional value (e.g., 4 for MAXDOP 4)
+	Hints       []string           // For USE HINT('hint1', 'hint2')
 	OptimizeFor []*OptimizeForHint // For OPTIMIZE FOR (@var = value, @var UNKNOWN)
 }
 
@@ -936,15 +936,15 @@ func (sc SelectColumn) String() string {
 
 // ForClause represents FOR XML or FOR JSON clause
 type ForClause struct {
-	Token       token.Token
-	ForType     string // "XML" or "JSON"
-	Mode        string // RAW, AUTO, PATH, EXPLICIT
-	ElementName string // Optional element name for RAW/PATH
-	Elements    bool   // ELEMENTS option (XML)
-	Type        bool   // TYPE option (returns xml type)
-	Root        string // ROOT('name') option
-	WithoutArrayWrapper bool // WITHOUT_ARRAY_WRAPPER (JSON)
-	IncludeNullValues   bool // INCLUDE_NULL_VALUES (JSON)
+	Token               token.Token
+	ForType             string // "XML" or "JSON"
+	Mode                string // RAW, AUTO, PATH, EXPLICIT
+	ElementName         string // Optional element name for RAW/PATH
+	Elements            bool   // ELEMENTS option (XML)
+	Type                bool   // TYPE option (returns xml type)
+	Root                string // ROOT('name') option
+	WithoutArrayWrapper bool   // WITHOUT_ARRAY_WRAPPER (JSON)
+	IncludeNullValues   bool   // INCLUDE_NULL_VALUES (JSON)
 }
 
 func (fc *ForClause) String() string {
@@ -953,13 +953,13 @@ func (fc *ForClause) String() string {
 	out.WriteString(fc.ForType)
 	out.WriteString(" ")
 	out.WriteString(fc.Mode)
-	
+
 	if fc.ElementName != "" {
 		out.WriteString("('")
 		out.WriteString(fc.ElementName)
 		out.WriteString("')")
 	}
-	
+
 	if fc.Elements {
 		out.WriteString(", ELEMENTS")
 	}
@@ -977,15 +977,15 @@ func (fc *ForClause) String() string {
 	if fc.IncludeNullValues {
 		out.WriteString(", INCLUDE_NULL_VALUES")
 	}
-	
+
 	return out.String()
 }
 
 // TopClause represents a TOP clause.
 type TopClause struct {
-	Count      Expression
-	Percent    bool
-	WithTies   bool
+	Count    Expression
+	Percent  bool
+	WithTies bool
 }
 
 func (tc *TopClause) String() string {
@@ -1222,8 +1222,8 @@ type TableValuedFunction struct {
 	Function        *QualifiedIdentifier
 	Arguments       []Expression
 	Alias           *Identifier
-	ColumnAliases   []*Identifier       // Column names like AS T(c)
-	OpenJsonColumns []*OpenJsonColumn   // For OPENJSON WITH clause
+	ColumnAliases   []*Identifier     // Column names like AS T(c)
+	OpenJsonColumns []*OpenJsonColumn // For OPENJSON WITH clause
 }
 
 func (tvf *TableValuedFunction) tableRefNode()        {}
@@ -1271,9 +1271,9 @@ func (tvf *TableValuedFunction) String() string {
 type PivotTable struct {
 	Token         token.Token
 	Source        TableReference
-	AggregateFunc string       // SUM, COUNT, AVG, etc.
-	ValueColumn   Expression   // Column being aggregated
-	PivotColumn   *Identifier  // Column whose values become columns
+	AggregateFunc string        // SUM, COUNT, AVG, etc.
+	ValueColumn   Expression    // Column being aggregated
+	PivotColumn   *Identifier   // Column whose values become columns
 	PivotValues   []*Identifier // Values that become column names
 	Alias         *Identifier
 }
@@ -1309,12 +1309,12 @@ func (pt *PivotTable) String() string {
 // UnpivotTable represents an UNPIVOT table operation.
 // Syntax: source UNPIVOT (value_col FOR pivot_col IN ([c1], [c2], ...)) AS alias
 type UnpivotTable struct {
-	Token          token.Token
-	Source         TableReference
-	ValueColumn    *Identifier   // New column to hold values
-	PivotColumn    *Identifier   // New column to hold original column names
-	SourceColumns  []*Identifier // Columns being unpivoted
-	Alias          *Identifier
+	Token         token.Token
+	Source        TableReference
+	ValueColumn   *Identifier   // New column to hold values
+	PivotColumn   *Identifier   // New column to hold original column names
+	SourceColumns []*Identifier // Columns being unpivoted
+	Alias         *Identifier
 }
 
 func (ut *UnpivotTable) tableRefNode()        {}
@@ -1434,7 +1434,7 @@ func (is *InsertStatement) TokenLiteral() string { return is.Token.Literal }
 func (is *InsertStatement) String() string {
 	var out strings.Builder
 	out.WriteString("INSERT ")
-	
+
 	if is.Top != nil {
 		out.WriteString("TOP (")
 		out.WriteString(is.Top.String())
@@ -1444,7 +1444,7 @@ func (is *InsertStatement) String() string {
 		}
 		out.WriteString(" ")
 	}
-	
+
 	out.WriteString("INTO ")
 	out.WriteString(is.Table.String())
 
@@ -1694,7 +1694,7 @@ type MergeStatement struct {
 	Token       token.Token
 	Target      *QualifiedIdentifier
 	TargetAlias *Identifier
-	Source      TableReference       // Can be table, subquery, etc.
+	Source      TableReference // Can be table, subquery, etc.
 	SourceAlias *Identifier
 	OnCondition Expression
 	WhenClauses []*MergeWhenClause
@@ -1736,7 +1736,7 @@ func (ms *MergeStatement) String() string {
 // MergeWhenClause represents a WHEN clause in a MERGE statement.
 type MergeWhenClause struct {
 	Type       MergeWhenType
-	Condition  Expression    // Optional AND condition
+	Condition  Expression // Optional AND condition
 	Action     MergeActionType
 	SetClauses []*SetClause  // For UPDATE
 	Columns    []*Identifier // For INSERT
@@ -1832,11 +1832,11 @@ func (cp *CreateProcedureStatement) String() string {
 
 // ParameterDef represents a parameter definition.
 type ParameterDef struct {
-	Name       string
-	DataType   *DataType
-	Default    Expression
-	Output     bool
-	ReadOnly   bool
+	Name     string
+	DataType *DataType
+	Default  Expression
+	Output   bool
+	ReadOnly bool
 }
 
 func (pd *ParameterDef) String() string {
@@ -2080,14 +2080,14 @@ func (ps *PrintStatement) String() string {
 // ExecStatement represents an EXEC/EXECUTE statement.
 type ExecStatement struct {
 	Token          token.Token
-	ReturnVariable *Identifier       // @ReturnCode = ...
+	ReturnVariable *Identifier // @ReturnCode = ...
 	Procedure      *QualifiedIdentifier
 	Parameters     []*ExecParameter
-	DynamicSQL     Expression // For EXEC('dynamic sql')
-	AtServer       *Identifier // For EXEC(...) AT LinkedServer
-	Recompile      bool       // WITH RECOMPILE
+	DynamicSQL     Expression             // For EXEC('dynamic sql')
+	AtServer       *Identifier            // For EXEC(...) AT LinkedServer
+	Recompile      bool                   // WITH RECOMPILE
 	ResultSets     []*ResultSetDefinition // WITH RESULT SETS ((...), (...))
-	ResultSetsMode string     // "UNDEFINED" or "NONE" for WITH RESULT SETS UNDEFINED/NONE
+	ResultSetsMode string                 // "UNDEFINED" or "NONE" for WITH RESULT SETS UNDEFINED/NONE
 }
 
 // ResultSetDefinition represents a result set column definition in EXEC WITH RESULT SETS
@@ -2163,10 +2163,10 @@ func (es *ExecStatement) String() string {
 
 // ThrowStatement represents a THROW statement.
 type ThrowStatement struct {
-	Token     token.Token
-	ErrorNum  Expression
-	Message   Expression
-	State     Expression
+	Token    token.Token
+	ErrorNum Expression
+	Message  Expression
+	State    Expression
 }
 
 func (ts *ThrowStatement) statementNode()       {}
@@ -2414,33 +2414,33 @@ func (es *ExpressionStatement) String() string {
 
 // ColumnDefinition represents a column definition in CREATE TABLE or table variable.
 type ColumnDefinition struct {
-	Token          token.Token
-	Name           *Identifier
-	DataType       *DataType
-	Nullable       *bool  // nil = not specified, true = NULL, false = NOT NULL
-	Default        Expression
-	Identity       *IdentitySpec
-	IsRowGuidCol   bool  // ROWGUIDCOL
-	IsSparse       bool  // SPARSE
-	IsColumnSet    bool  // COLUMN_SET FOR ALL_SPARSE_COLUMNS
-	Collation      string
-	Computed       Expression    // For computed columns: AS (expression)
-	IsPersisted    bool          // PERSISTED for computed columns
-	Constraints    []*ColumnConstraint // Inline constraints
-	GeneratedAlways string // "ROW START" or "ROW END" for temporal tables
-	InlineIndex    *InlineIndex // INDEX index_name [CLUSTERED|NONCLUSTERED]
+	Token           token.Token
+	Name            *Identifier
+	DataType        *DataType
+	Nullable        *bool // nil = not specified, true = NULL, false = NOT NULL
+	Default         Expression
+	Identity        *IdentitySpec
+	IsRowGuidCol    bool // ROWGUIDCOL
+	IsSparse        bool // SPARSE
+	IsColumnSet     bool // COLUMN_SET FOR ALL_SPARSE_COLUMNS
+	Collation       string
+	Computed        Expression          // For computed columns: AS (expression)
+	IsPersisted     bool                // PERSISTED for computed columns
+	Constraints     []*ColumnConstraint // Inline constraints
+	GeneratedAlways string              // "ROW START" or "ROW END" for temporal tables
+	InlineIndex     *InlineIndex        // INDEX index_name [CLUSTERED|NONCLUSTERED]
 }
 
 // InlineIndex represents an inline index definition on a column
 type InlineIndex struct {
-	Name       string
-	Clustered  *bool // nil = not specified, true = CLUSTERED, false = NONCLUSTERED
+	Name      string
+	Clustered *bool // nil = not specified, true = CLUSTERED, false = NONCLUSTERED
 }
 
 func (cd *ColumnDefinition) String() string {
 	var out strings.Builder
 	out.WriteString(cd.Name.Value)
-	
+
 	if cd.Computed != nil {
 		out.WriteString(" AS (")
 		out.WriteString(cd.Computed.String())
@@ -2452,12 +2452,12 @@ func (cd *ColumnDefinition) String() string {
 		out.WriteString(" ")
 		out.WriteString(cd.DataType.String())
 	}
-	
+
 	if cd.Collation != "" {
 		out.WriteString(" COLLATE ")
 		out.WriteString(cd.Collation)
 	}
-	
+
 	if cd.Nullable != nil {
 		if *cd.Nullable {
 			out.WriteString(" NULL")
@@ -2465,29 +2465,29 @@ func (cd *ColumnDefinition) String() string {
 			out.WriteString(" NOT NULL")
 		}
 	}
-	
+
 	if cd.Identity != nil {
 		out.WriteString(" ")
 		out.WriteString(cd.Identity.String())
 	}
-	
+
 	if cd.IsRowGuidCol {
 		out.WriteString(" ROWGUIDCOL")
 	}
-	
+
 	if cd.IsSparse {
 		out.WriteString(" SPARSE")
 	}
-	
+
 	if cd.IsColumnSet {
 		out.WriteString(" COLUMN_SET FOR ALL_SPARSE_COLUMNS")
 	}
-	
+
 	if cd.Default != nil {
 		out.WriteString(" DEFAULT ")
 		out.WriteString(cd.Default.String())
 	}
-	
+
 	if cd.InlineIndex != nil {
 		out.WriteString(" INDEX ")
 		out.WriteString(cd.InlineIndex.Name)
@@ -2499,12 +2499,12 @@ func (cd *ColumnDefinition) String() string {
 			}
 		}
 	}
-	
+
 	for _, c := range cd.Constraints {
 		out.WriteString(" ")
 		out.WriteString(c.String())
 	}
-	
+
 	return out.String()
 }
 
@@ -2520,15 +2520,15 @@ func (is *IdentitySpec) String() string {
 
 // ColumnConstraint represents an inline constraint on a column.
 type ColumnConstraint struct {
-	Name           string // Optional constraint name
-	Type           ConstraintType
-	IsPrimaryKey   bool
-	IsClustered    *bool // nil = not specified
-	ReferencesTable *QualifiedIdentifier
+	Name              string // Optional constraint name
+	Type              ConstraintType
+	IsPrimaryKey      bool
+	IsClustered       *bool // nil = not specified
+	ReferencesTable   *QualifiedIdentifier
 	ReferencesColumns []*Identifier
-	CheckExpression Expression
-	OnDelete       string // CASCADE, SET NULL, SET DEFAULT, NO ACTION
-	OnUpdate       string
+	CheckExpression   Expression
+	OnDelete          string // CASCADE, SET NULL, SET DEFAULT, NO ACTION
+	OnUpdate          string
 }
 
 type ConstraintType int
@@ -2545,13 +2545,13 @@ const (
 
 func (cc *ColumnConstraint) String() string {
 	var out strings.Builder
-	
+
 	if cc.Name != "" {
 		out.WriteString("CONSTRAINT ")
 		out.WriteString(cc.Name)
 		out.WriteString(" ")
 	}
-	
+
 	switch cc.Type {
 	case ConstraintPrimaryKey:
 		out.WriteString("PRIMARY KEY")
@@ -2590,36 +2590,36 @@ func (cc *ColumnConstraint) String() string {
 			out.WriteString(cc.OnUpdate)
 		}
 	}
-	
+
 	return out.String()
 }
 
 // TableConstraint represents a table-level constraint in CREATE TABLE.
 type TableConstraint struct {
-	Token          token.Token
-	Name           string
-	Type           ConstraintType
-	Columns        []*IndexColumn // For PK, UNIQUE, FK
-	IsClustered    *bool
-	IndexOptions   string // WITH (FILLFACTOR = 90, etc.)
-	ReferencesTable *QualifiedIdentifier
+	Token             token.Token
+	Name              string
+	Type              ConstraintType
+	Columns           []*IndexColumn // For PK, UNIQUE, FK
+	IsClustered       *bool
+	IndexOptions      string // WITH (FILLFACTOR = 90, etc.)
+	ReferencesTable   *QualifiedIdentifier
 	ReferencesColumns []*Identifier
-	CheckExpression Expression
+	CheckExpression   Expression
 	DefaultExpression Expression  // For DEFAULT constraints
-	ForColumn       *Identifier   // For DEFAULT ... FOR column
-	OnDelete       string
-	OnUpdate       string
+	ForColumn         *Identifier // For DEFAULT ... FOR column
+	OnDelete          string
+	OnUpdate          string
 }
 
 func (tc *TableConstraint) String() string {
 	var out strings.Builder
-	
+
 	if tc.Name != "" {
 		out.WriteString("CONSTRAINT ")
 		out.WriteString(tc.Name)
 		out.WriteString(" ")
 	}
-	
+
 	switch tc.Type {
 	case ConstraintPrimaryKey:
 		out.WriteString("PRIMARY KEY")
@@ -2643,7 +2643,7 @@ func (tc *TableConstraint) String() string {
 			out.WriteString(tc.IndexOptions)
 			out.WriteString(")")
 		}
-		
+
 	case ConstraintUnique:
 		out.WriteString("UNIQUE")
 		if tc.IsClustered != nil {
@@ -2666,7 +2666,7 @@ func (tc *TableConstraint) String() string {
 			out.WriteString(tc.IndexOptions)
 			out.WriteString(")")
 		}
-		
+
 	case ConstraintForeignKey:
 		out.WriteString("FOREIGN KEY (")
 		for i, col := range tc.Columns {
@@ -2693,7 +2693,7 @@ func (tc *TableConstraint) String() string {
 			out.WriteString(" ON UPDATE ")
 			out.WriteString(tc.OnUpdate)
 		}
-		
+
 	case ConstraintCheck:
 		out.WriteString("CHECK (")
 		out.WriteString(tc.CheckExpression.String())
@@ -2740,7 +2740,7 @@ func (tc *TableConstraint) String() string {
 		}
 		out.WriteString(")")
 	}
-	
+
 	return out.String()
 }
 
@@ -2759,14 +2759,14 @@ func (ic *IndexColumn) String() string {
 
 // CreateTableStatement represents a CREATE TABLE statement.
 type CreateTableStatement struct {
-	Token           token.Token
-	Name            *QualifiedIdentifier
-	IsTemporary     bool   // #temp or ##global
-	Columns         []*ColumnDefinition
-	Constraints     []*TableConstraint
-	AsSelect        *SelectStatement // CREATE TABLE ... AS SELECT
-	FileGroup       string // ON [filegroup]
-	TextImageOn     string // TEXTIMAGE_ON [filegroup]
+	Token       token.Token
+	Name        *QualifiedIdentifier
+	IsTemporary bool // #temp or ##global
+	Columns     []*ColumnDefinition
+	Constraints []*TableConstraint
+	AsSelect    *SelectStatement // CREATE TABLE ... AS SELECT
+	FileGroup   string           // ON [filegroup]
+	TextImageOn string           // TEXTIMAGE_ON [filegroup]
 }
 
 func (ct *CreateTableStatement) statementNode()       {}
@@ -2776,7 +2776,7 @@ func (ct *CreateTableStatement) String() string {
 	out.WriteString("CREATE TABLE ")
 	out.WriteString(ct.Name.String())
 	out.WriteString(" (\n")
-	
+
 	for i, col := range ct.Columns {
 		out.WriteString("    ")
 		out.WriteString(col.String())
@@ -2785,7 +2785,7 @@ func (ct *CreateTableStatement) String() string {
 		}
 		out.WriteString("\n")
 	}
-	
+
 	for i, con := range ct.Constraints {
 		out.WriteString("    ")
 		out.WriteString(con.String())
@@ -2794,7 +2794,7 @@ func (ct *CreateTableStatement) String() string {
 		}
 		out.WriteString("\n")
 	}
-	
+
 	out.WriteString(")")
 	if ct.FileGroup != "" {
 		out.WriteString(" ON ")
@@ -2889,19 +2889,19 @@ func (at *AlterTableStatement) String() string {
 
 // AlterTableAction represents an action in ALTER TABLE.
 type AlterTableAction struct {
-	Type             AlterActionType
-	Column           *ColumnDefinition
-	Columns          []*ColumnDefinition // For ADD with multiple columns
-	ColumnName       *Identifier
-	NewDataType      *DataType
-	Constraint       *TableConstraint
-	ConstraintName   string
-	NewColumnName    *Identifier
-	TriggerName      string            // For ENABLE/DISABLE TRIGGER
-	AllTriggers      bool              // For ENABLE/DISABLE TRIGGER ALL
-	AllConstraints   bool              // For CHECK/NOCHECK CONSTRAINT ALL
-	Options          map[string]string // For SET (option = value)
-	RawOptions       string            // For SWITCH, REBUILD, etc.
+	Type           AlterActionType
+	Column         *ColumnDefinition
+	Columns        []*ColumnDefinition // For ADD with multiple columns
+	ColumnName     *Identifier
+	NewDataType    *DataType
+	Constraint     *TableConstraint
+	ConstraintName string
+	NewColumnName  *Identifier
+	TriggerName    string            // For ENABLE/DISABLE TRIGGER
+	AllTriggers    bool              // For ENABLE/DISABLE TRIGGER ALL
+	AllConstraints bool              // For CHECK/NOCHECK CONSTRAINT ALL
+	Options        map[string]string // For SET (option = value)
+	RawOptions     string            // For SWITCH, REBUILD, etc.
 }
 
 type AlterActionType int
@@ -2982,21 +2982,21 @@ type TableTypeDefinition struct {
 func (tt *TableTypeDefinition) String() string {
 	var out strings.Builder
 	out.WriteString("TABLE (")
-	
+
 	for i, col := range tt.Columns {
 		if i > 0 {
 			out.WriteString(", ")
 		}
 		out.WriteString(col.String())
 	}
-	
+
 	for i, con := range tt.Constraints {
 		if i > 0 || len(tt.Columns) > 0 {
 			out.WriteString(", ")
 		}
 		out.WriteString(con.String())
 	}
-	
+
 	out.WriteString(")")
 	return out.String()
 }
@@ -3033,18 +3033,18 @@ func (dc *DeclareCursorStatement) String() string {
 
 // CursorOptions represents cursor declaration options.
 type CursorOptions struct {
-	Local        bool // LOCAL vs GLOBAL
-	Global       bool
-	ForwardOnly  bool // FORWARD_ONLY vs SCROLL
-	Scroll       bool
-	Static       bool // STATIC, KEYSET, DYNAMIC, FAST_FORWARD
-	Keyset       bool
-	Dynamic      bool
-	FastForward  bool
-	ReadOnly     bool // READ_ONLY, SCROLL_LOCKS, OPTIMISTIC
-	ScrollLocks  bool
-	Optimistic   bool
-	TypeWarning  bool // TYPE_WARNING
+	Local       bool // LOCAL vs GLOBAL
+	Global      bool
+	ForwardOnly bool // FORWARD_ONLY vs SCROLL
+	Scroll      bool
+	Static      bool // STATIC, KEYSET, DYNAMIC, FAST_FORWARD
+	Keyset      bool
+	Dynamic     bool
+	FastForward bool
+	ReadOnly    bool // READ_ONLY, SCROLL_LOCKS, OPTIMISTIC
+	ScrollLocks bool
+	Optimistic  bool
+	TypeWarning bool // TYPE_WARNING
 }
 
 func (co *CursorOptions) String() string {
@@ -3105,11 +3105,11 @@ func (oc *OpenCursorStatement) String() string {
 
 // FetchStatement represents FETCH [NEXT|PRIOR|FIRST|LAST|ABSOLUTE|RELATIVE] FROM cursor INTO vars.
 type FetchStatement struct {
-	Token       token.Token
-	Direction   string       // NEXT, PRIOR, FIRST, LAST, ABSOLUTE, RELATIVE
-	Offset      Expression   // For ABSOLUTE n or RELATIVE n
-	CursorName  *Identifier
-	IntoVars    []*Variable
+	Token      token.Token
+	Direction  string     // NEXT, PRIOR, FIRST, LAST, ABSOLUTE, RELATIVE
+	Offset     Expression // For ABSOLUTE n or RELATIVE n
+	CursorName *Identifier
+	IntoVars   []*Variable
 }
 
 func (fs *FetchStatement) statementNode()       {}
@@ -3169,12 +3169,12 @@ func (dc *DeallocateCursorStatement) String() string {
 
 // CreateViewStatement represents a CREATE VIEW statement.
 type CreateViewStatement struct {
-	Token         token.Token
-	Name          *QualifiedIdentifier
-	Columns       []*Identifier // Optional column list
-	Options       []string      // WITH SCHEMABINDING, etc.
-	AsSelect      Statement     // Can be SelectStatement or WithStatement (CTE)
-	CheckOption   bool          // WITH CHECK OPTION
+	Token       token.Token
+	Name        *QualifiedIdentifier
+	Columns     []*Identifier // Optional column list
+	Options     []string      // WITH SCHEMABINDING, etc.
+	AsSelect    Statement     // Can be SelectStatement or WithStatement (CTE)
+	CheckOption bool          // WITH CHECK OPTION
 }
 
 func (cv *CreateViewStatement) statementNode()       {}
@@ -3204,11 +3204,11 @@ func (cv *CreateViewStatement) String() string {
 
 // AlterViewStatement represents an ALTER VIEW statement.
 type AlterViewStatement struct {
-	Token         token.Token
-	Name          *QualifiedIdentifier
-	Columns       []*Identifier
-	Options       []string
-	AsSelect      Statement     // Can be SelectStatement or WithStatement (CTE)
+	Token    token.Token
+	Name     *QualifiedIdentifier
+	Columns  []*Identifier
+	Options  []string
+	AsSelect Statement // Can be SelectStatement or WithStatement (CTE)
 }
 
 func (av *AlterViewStatement) statementNode()       {}
@@ -3234,16 +3234,16 @@ func (av *AlterViewStatement) String() string {
 
 // CreateIndexStatement represents a CREATE INDEX statement.
 type CreateIndexStatement struct {
-	Token        token.Token
-	IsUnique     bool
-	IsClustered  *bool // nil = not specified, true = CLUSTERED, false = NONCLUSTERED
-	Name         *Identifier
-	Table        *QualifiedIdentifier
-	Columns      []*IndexColumn
+	Token          token.Token
+	IsUnique       bool
+	IsClustered    *bool // nil = not specified, true = CLUSTERED, false = NONCLUSTERED
+	Name           *Identifier
+	Table          *QualifiedIdentifier
+	Columns        []*IndexColumn
 	IncludeColumns []*Identifier
-	Where        Expression
-	Options      []string // WITH (options)
-	Filegroup    *Identifier // ON [filegroup]
+	Where          Expression
+	Options        []string    // WITH (options)
+	Filegroup      *Identifier // ON [filegroup]
 }
 
 func (ci *CreateIndexStatement) statementNode()       {}
@@ -3448,13 +3448,13 @@ type CreateFunctionStatement struct {
 	Token        token.Token
 	Name         *QualifiedIdentifier
 	Parameters   []*ParameterDef
-	ReturnType   *DataType          // For scalar functions
-	ReturnsTable bool               // For inline TVF: RETURNS TABLE
+	ReturnType   *DataType            // For scalar functions
+	ReturnsTable bool                 // For inline TVF: RETURNS TABLE
 	TableDef     *TableTypeDefinition // For multi-statement TVF: RETURNS @var TABLE (...)
 	TableVar     string               // Variable name for multi-statement TVF
-	Options      []string           // WITH SCHEMABINDING, etc.
-	AsReturn     Expression         // For inline TVF: AS RETURN (SELECT...)
-	Body         *BeginEndBlock     // For scalar and multi-statement
+	Options      []string             // WITH SCHEMABINDING, etc.
+	AsReturn     Expression           // For inline TVF: AS RETURN (SELECT...)
+	Body         *BeginEndBlock       // For scalar and multi-statement
 }
 
 func (cf *CreateFunctionStatement) statementNode()       {}
@@ -3569,12 +3569,12 @@ func (ct *CreateTriggerStatement) String() string {
 
 // AlterTriggerStatement represents an ALTER TRIGGER statement.
 type AlterTriggerStatement struct {
-	Token   token.Token
-	Name    *QualifiedIdentifier
-	Table   *QualifiedIdentifier
-	Timing  TriggerTiming
-	Events  []string
-	Body    *BeginEndBlock
+	Token  token.Token
+	Name   *QualifiedIdentifier
+	Table  *QualifiedIdentifier
+	Timing TriggerTiming
+	Events []string
+	Body   *BeginEndBlock
 }
 
 func (at *AlterTriggerStatement) statementNode()       {}
@@ -3639,8 +3639,8 @@ type DropObjectStatement struct {
 	IfExists   bool
 	Names      []*QualifiedIdentifier
 	// For DROP INDEX: index name and table
-	IndexName  *Identifier
-	TableName  *QualifiedIdentifier
+	IndexName *Identifier
+	TableName *QualifiedIdentifier
 	// For DROP TRIGGER: scope
 	OnDatabase  bool // ON DATABASE
 	OnAllServer bool // ON ALL SERVER
@@ -3746,9 +3746,9 @@ func (ls *LabelStatement) String() string {
 // SetOptionStatement represents various SET option statements.
 type SetOptionStatement struct {
 	Token  token.Token
-	Option string      // IDENTITY_INSERT, ROWCOUNT, LANGUAGE, etc.
+	Option string               // IDENTITY_INSERT, ROWCOUNT, LANGUAGE, etc.
 	Table  *QualifiedIdentifier // For IDENTITY_INSERT
-	Value  Expression  // The value (ON/OFF, number, identifier)
+	Value  Expression           // The value (ON/OFF, number, identifier)
 }
 
 func (so *SetOptionStatement) statementNode()       {}
@@ -3841,8 +3841,8 @@ func (ea *ExecuteAsStatement) String() string {
 
 // RevertStatement represents REVERT.
 type RevertStatement struct {
-	Token   token.Token
-	Cookie  Expression // Optional: WITH COOKIE = @cookie
+	Token  token.Token
+	Cookie Expression // Optional: WITH COOKIE = @cookie
 }
 
 func (rs *RevertStatement) statementNode()       {}
@@ -3872,12 +3872,12 @@ func (rs *ReconfigureStatement) String() string {
 // GrantStatement represents GRANT permissions statement.
 type GrantStatement struct {
 	Token           token.Token
-	Permissions     []string           // SELECT, INSERT, UPDATE, DELETE, EXECUTE, etc.
-	OnType          string             // OBJECT, SCHEMA, DATABASE, or empty for object-level
+	Permissions     []string // SELECT, INSERT, UPDATE, DELETE, EXECUTE, etc.
+	OnType          string   // OBJECT, SCHEMA, DATABASE, or empty for object-level
 	OnObject        *QualifiedIdentifier
-	Columns         []string           // Column-level permissions (col1, col2, ...)
-	ToPrincipals    []string           // Users, roles, logins
-	WithGrantOption bool               // WITH GRANT OPTION
+	Columns         []string // Column-level permissions (col1, col2, ...)
+	ToPrincipals    []string // Users, roles, logins
+	WithGrantOption bool     // WITH GRANT OPTION
 }
 
 func (gs *GrantStatement) statementNode()       {}
@@ -3908,14 +3908,14 @@ func (gs *GrantStatement) String() string {
 
 // RevokeStatement represents REVOKE permissions statement.
 type RevokeStatement struct {
-	Token           token.Token
-	GrantOptionFor  bool               // GRANT OPTION FOR
-	Permissions     []string           // SELECT, INSERT, UPDATE, DELETE, EXECUTE, etc.
-	OnType          string             // OBJECT, SCHEMA, DATABASE, or empty
-	OnObject        *QualifiedIdentifier
-	Columns         []string           // Column-level permissions (col1, col2, ...)
-	FromPrincipals  []string           // Users, roles, logins
-	Cascade         bool               // CASCADE
+	Token          token.Token
+	GrantOptionFor bool     // GRANT OPTION FOR
+	Permissions    []string // SELECT, INSERT, UPDATE, DELETE, EXECUTE, etc.
+	OnType         string   // OBJECT, SCHEMA, DATABASE, or empty
+	OnObject       *QualifiedIdentifier
+	Columns        []string // Column-level permissions (col1, col2, ...)
+	FromPrincipals []string // Users, roles, logins
+	Cascade        bool     // CASCADE
 }
 
 func (rs *RevokeStatement) statementNode()       {}
@@ -3950,12 +3950,12 @@ func (rs *RevokeStatement) String() string {
 // DenyStatement represents DENY permissions statement.
 type DenyStatement struct {
 	Token        token.Token
-	Permissions  []string           // SELECT, INSERT, UPDATE, DELETE, EXECUTE, etc.
-	OnType       string             // OBJECT, SCHEMA, DATABASE, or empty
+	Permissions  []string // SELECT, INSERT, UPDATE, DELETE, EXECUTE, etc.
+	OnType       string   // OBJECT, SCHEMA, DATABASE, or empty
 	OnObject     *QualifiedIdentifier
-	Columns      []string           // Column-level permissions (col1, col2, ...)
-	ToPrincipals []string           // Users, roles, logins
-	Cascade      bool               // CASCADE
+	Columns      []string // Column-level permissions (col1, col2, ...)
+	ToPrincipals []string // Users, roles, logins
+	Cascade      bool     // CASCADE
 }
 
 func (ds *DenyStatement) statementNode()       {}
@@ -3986,14 +3986,14 @@ func (ds *DenyStatement) String() string {
 
 // CreateLoginStatement represents CREATE LOGIN statement.
 type CreateLoginStatement struct {
-	Token         token.Token
-	Name          string
-	FromWindows   bool   // FROM WINDOWS
-	Password      string // WITH PASSWORD = 'xxx'
-	DefaultDB     string // WITH DEFAULT_DATABASE = xxx
-	DefaultLang   string // WITH DEFAULT_LANGUAGE = xxx
-	CheckPolicy   *bool  // WITH CHECK_POLICY = ON/OFF
-	CheckExpiry   *bool  // WITH CHECK_EXPIRATION = ON/OFF
+	Token       token.Token
+	Name        string
+	FromWindows bool   // FROM WINDOWS
+	Password    string // WITH PASSWORD = 'xxx'
+	DefaultDB   string // WITH DEFAULT_DATABASE = xxx
+	DefaultLang string // WITH DEFAULT_LANGUAGE = xxx
+	CheckPolicy *bool  // WITH CHECK_POLICY = ON/OFF
+	CheckExpiry *bool  // WITH CHECK_EXPIRATION = ON/OFF
 }
 
 func (cls *CreateLoginStatement) statementNode()       {}
@@ -4015,11 +4015,11 @@ func (cls *CreateLoginStatement) String() string {
 
 // AlterLoginStatement represents ALTER LOGIN statement.
 type AlterLoginStatement struct {
-	Token    token.Token
-	Name     string
-	Enable   bool
-	Disable  bool
-	Password string
+	Token       token.Token
+	Name        string
+	Enable      bool
+	Disable     bool
+	Password    string
 	OldPassword string
 }
 
@@ -4346,10 +4346,10 @@ func (a *AlterServerRoleStatement) String() string {
 // BackupStatement represents BACKUP DATABASE/LOG statement.
 type BackupStatement struct {
 	Token        token.Token
-	BackupType   string             // DATABASE, LOG, CERTIFICATE
-	DatabaseName string             // Database or certificate name
-	ToLocations  []*BackupLocation  // TO DISK/URL = 'path', ...
-	WithOptions  []*BackupOption    // WITH option = value, ...
+	BackupType   string            // DATABASE, LOG, CERTIFICATE
+	DatabaseName string            // Database or certificate name
+	ToLocations  []*BackupLocation // TO DISK/URL = 'path', ...
+	WithOptions  []*BackupOption   // WITH option = value, ...
 }
 
 // BackupLocation represents a backup destination.
@@ -4406,10 +4406,10 @@ func (bs *BackupStatement) String() string {
 // RestoreStatement represents RESTORE DATABASE/LOG/FILELISTONLY/HEADERONLY statement.
 type RestoreStatement struct {
 	Token         token.Token
-	RestoreType   string              // DATABASE, LOG, FILELISTONLY, HEADERONLY, VERIFYONLY
-	DatabaseName  string              // Database name (empty for FILELISTONLY/HEADERONLY)
-	FromLocations []*BackupLocation   // FROM DISK/URL = 'path', ...
-	WithOptions   []*BackupOption     // WITH option = value, ...
+	RestoreType   string            // DATABASE, LOG, FILELISTONLY, HEADERONLY, VERIFYONLY
+	DatabaseName  string            // Database name (empty for FILELISTONLY/HEADERONLY)
+	FromLocations []*BackupLocation // FROM DISK/URL = 'path', ...
+	WithOptions   []*BackupOption   // WITH option = value, ...
 }
 
 func (rs *RestoreStatement) statementNode()       {}
@@ -4507,10 +4507,10 @@ func (cc *CreateCertificateStatement) String() string {
 type CreateSymmetricKeyStatement struct {
 	Token         token.Token
 	Name          string
-	Algorithm     string   // WITH ALGORITHM = AES_256, etc.
-	EncryptByCert string   // ENCRYPTION BY CERTIFICATE name
-	EncryptByKey  string   // ENCRYPTION BY SYMMETRIC KEY name
-	EncryptByPwd  string   // ENCRYPTION BY PASSWORD = 'xxx'
+	Algorithm     string // WITH ALGORITHM = AES_256, etc.
+	EncryptByCert string // ENCRYPTION BY CERTIFICATE name
+	EncryptByKey  string // ENCRYPTION BY SYMMETRIC KEY name
+	EncryptByPwd  string // ENCRYPTION BY PASSWORD = 'xxx'
 }
 
 func (csk *CreateSymmetricKeyStatement) statementNode()       {}
@@ -4568,8 +4568,8 @@ func (cak *CreateAsymmetricKeyStatement) String() string {
 
 // OpenSymmetricKeyStatement represents OPEN SYMMETRIC KEY statement.
 type OpenSymmetricKeyStatement struct {
-	Token        token.Token
-	KeyName      string
+	Token         token.Token
+	KeyName       string
 	DecryptByCert string // DECRYPTION BY CERTIFICATE name
 	DecryptByKey  string // DECRYPTION BY SYMMETRIC KEY name
 	DecryptByPwd  string // DECRYPTION BY PASSWORD = 'xxx'
@@ -4672,10 +4672,10 @@ func (aa *AlterAssemblyStatement) String() string {
 
 // CreatePartitionFunctionStatement represents CREATE PARTITION FUNCTION statement.
 type CreatePartitionFunctionStatement struct {
-	Token       token.Token
-	Name        string
-	InputType   *DataType // Parameter type
-	RangeType   string    // LEFT or RIGHT
+	Token          token.Token
+	Name           string
+	InputType      *DataType    // Parameter type
+	RangeType      string       // LEFT or RIGHT
 	BoundaryValues []Expression // Values list
 }
 
@@ -4762,9 +4762,9 @@ func (cps *CreatePartitionSchemeStatement) String() string {
 
 // AlterPartitionSchemeStatement represents ALTER PARTITION SCHEME statement.
 type AlterPartitionSchemeStatement struct {
-	Token     token.Token
-	Name      string
-	NextUsed  string // NEXT USED filegroup
+	Token    token.Token
+	Name     string
+	NextUsed string // NEXT USED filegroup
 }
 
 func (aps *AlterPartitionSchemeStatement) statementNode()       {}
@@ -4784,10 +4784,10 @@ func (aps *AlterPartitionSchemeStatement) String() string {
 
 // ContainsExpression represents the CONTAINS predicate.
 type ContainsExpression struct {
-	Token       token.Token
-	Columns     []string   // Column(s) to search, or * for all
-	SearchTerm  Expression // Search condition
-	Language    string     // Optional LANGUAGE value
+	Token      token.Token
+	Columns    []string   // Column(s) to search, or * for all
+	SearchTerm Expression // Search condition
+	Language   string     // Optional LANGUAGE value
 }
 
 func (ce *ContainsExpression) expressionNode()      {}
@@ -4965,10 +4965,10 @@ type CreateFulltextIndexStatement struct {
 
 // FulltextColumn represents a column in a fulltext index.
 type FulltextColumn struct {
-	Name         string
-	TypeColumn   string // TYPE COLUMN type_column_name
-	Language     string // LANGUAGE language_term
-	StatisticalSemantics bool // STATISTICAL_SEMANTICS
+	Name                 string
+	TypeColumn           string // TYPE COLUMN type_column_name
+	Language             string // LANGUAGE language_term
+	StatisticalSemantics bool   // STATISTICAL_SEMANTICS
 }
 
 func (fic *FulltextColumn) String() string {
@@ -5012,10 +5012,10 @@ func (cfi *CreateFulltextIndexStatement) String() string {
 
 // AlterFulltextIndexStatement represents ALTER FULLTEXT INDEX ON table.
 type AlterFulltextIndexStatement struct {
-	Token       token.Token
-	TableName   *QualifiedIdentifier
-	Action      string            // ADD, DROP, ENABLE, DISABLE, START/STOP POPULATION, etc.
-	Columns     []*FulltextColumn // Columns for ADD/DROP
+	Token     token.Token
+	TableName *QualifiedIdentifier
+	Action    string            // ADD, DROP, ENABLE, DISABLE, START/STOP POPULATION, etc.
+	Columns   []*FulltextColumn // Columns for ADD/DROP
 }
 
 func (afi *AlterFulltextIndexStatement) statementNode()       {}
@@ -5141,11 +5141,11 @@ func (drp *DropResourcePoolStatement) String() string {
 
 // CreateWorkloadGroupStatement represents CREATE WORKLOAD GROUP.
 type CreateWorkloadGroupStatement struct {
-	Token    token.Token
-	Name     string
-	Options  map[string]string // WITH options
-	PoolName string            // USING pool_name
-	ExternalPoolName string    // EXTERNAL external_pool_name
+	Token            token.Token
+	Name             string
+	Options          map[string]string // WITH options
+	PoolName         string            // USING pool_name
+	ExternalPoolName string            // EXTERNAL external_pool_name
 }
 
 func (cwg *CreateWorkloadGroupStatement) statementNode()       {}
@@ -5248,7 +5248,7 @@ func (arg *AlterResourceGovernorStatement) String() string {
 type CreateAvailabilityGroupStatement struct {
 	Token     token.Token
 	Name      string
-	Databases []string           // FOR DATABASE db1, db2
+	Databases []string // FOR DATABASE db1, db2
 	Replicas  []*AvailabilityReplica
 }
 
@@ -5303,11 +5303,11 @@ func (cag *CreateAvailabilityGroupStatement) String() string {
 
 // AlterAvailabilityGroupStatement represents ALTER AVAILABILITY GROUP.
 type AlterAvailabilityGroupStatement struct {
-	Token       token.Token
-	Name        string
-	Action      string   // ADD DATABASE, REMOVE DATABASE, FAILOVER, FORCE_FAILOVER_ALLOW_DATA_LOSS, etc.
-	Databases   []string // For ADD/REMOVE DATABASE
-	Replicas    []*AvailabilityReplica // For ADD/MODIFY REPLICA
+	Token     token.Token
+	Name      string
+	Action    string                 // ADD DATABASE, REMOVE DATABASE, FAILOVER, FORCE_FAILOVER_ALLOW_DATA_LOSS, etc.
+	Databases []string               // For ADD/REMOVE DATABASE
+	Replicas  []*AvailabilityReplica // For ADD/MODIFY REPLICA
 }
 
 func (aag *AlterAvailabilityGroupStatement) statementNode()       {}
@@ -5343,9 +5343,9 @@ func (dag *DropAvailabilityGroupStatement) String() string {
 
 // CreateMessageTypeStatement represents CREATE MESSAGE TYPE.
 type CreateMessageTypeStatement struct {
-	Token      token.Token
-	Name       string
-	Validation string // NONE, EMPTY, WELL_FORMED_XML, VALID_XML WITH SCHEMA COLLECTION
+	Token         token.Token
+	Name          string
+	Validation    string // NONE, EMPTY, WELL_FORMED_XML, VALID_XML WITH SCHEMA COLLECTION
 	Authorization string
 }
 
@@ -5401,9 +5401,9 @@ func (cc *CreateContractStatement) String() string {
 
 // CreateQueueStatement represents CREATE QUEUE.
 type CreateQueueStatement struct {
-	Token      token.Token
-	Name       *QualifiedIdentifier
-	Options    map[string]string // WITH options: STATUS, RETENTION, ACTIVATION, POISON_MESSAGE_HANDLING
+	Token       token.Token
+	Name        *QualifiedIdentifier
+	Options     map[string]string // WITH options: STATUS, RETENTION, ACTIVATION, POISON_MESSAGE_HANDLING
 	OnFilegroup string
 }
 
@@ -5462,10 +5462,10 @@ func (aq *AlterQueueStatement) String() string {
 
 // CreateServiceStatement represents CREATE SERVICE.
 type CreateServiceStatement struct {
-	Token      token.Token
-	Name       string
-	OnQueue    string
-	Contracts  []string
+	Token         token.Token
+	Name          string
+	OnQueue       string
+	Contracts     []string
 	Authorization string
 }
 
@@ -5487,12 +5487,12 @@ func (cs *CreateServiceStatement) String() string {
 
 // BeginDialogStatement represents BEGIN DIALOG CONVERSATION.
 type BeginDialogStatement struct {
-	Token         token.Token
-	DialogHandle  string // Variable to receive handle
-	FromService   string
-	ToService     string
-	OnContract    string
-	WithOptions   map[string]string // ENCRYPTION, LIFETIME, RELATED_CONVERSATION, etc.
+	Token        token.Token
+	DialogHandle string // Variable to receive handle
+	FromService  string
+	ToService    string
+	OnContract   string
+	WithOptions  map[string]string // ENCRYPTION, LIFETIME, RELATED_CONVERSATION, etc.
 }
 
 func (bd *BeginDialogStatement) statementNode()       {}
@@ -5515,10 +5515,10 @@ func (bd *BeginDialogStatement) String() string {
 
 // SendOnConversationStatement represents SEND ON CONVERSATION.
 type SendOnConversationStatement struct {
-	Token          token.Token
+	Token              token.Token
 	ConversationHandle string // Variable or expression
-	MessageType    string
-	MessageBody    Expression
+	MessageType        string
+	MessageBody        Expression
 }
 
 func (soc *SendOnConversationStatement) statementNode()       {}
@@ -5541,13 +5541,13 @@ func (soc *SendOnConversationStatement) String() string {
 
 // ReceiveStatement represents RECEIVE FROM queue.
 type ReceiveStatement struct {
-	Token       token.Token
-	Top         Expression // TOP(n)
-	Columns     []*ReceiveColumn // Column assignments
-	FromQueue   *QualifiedIdentifier
-	Into        string // INTO table_variable
-	Where       Expression
-	Timeout     Expression // WAITFOR with timeout
+	Token     token.Token
+	Top       Expression       // TOP(n)
+	Columns   []*ReceiveColumn // Column assignments
+	FromQueue *QualifiedIdentifier
+	Into      string // INTO table_variable
+	Where     Expression
+	Timeout   Expression // WAITFOR with timeout
 }
 
 // ReceiveColumn represents a column in RECEIVE statement.
@@ -5747,9 +5747,9 @@ func (cs *CreateXmlSchemaCollectionStatement) String() string {
 
 // AlterDatabaseStatement represents ALTER DATABASE.
 type AlterDatabaseStatement struct {
-	Token       token.Token
-	Name        *Identifier
-	Options     string // Raw options (SET SINGLE_USER WITH ROLLBACK IMMEDIATE, etc.)
+	Token   token.Token
+	Name    *Identifier
+	Options string // Raw options (SET SINGLE_USER WITH ROLLBACK IMMEDIATE, etc.)
 }
 
 func (ad *AlterDatabaseStatement) statementNode()       {}
@@ -5842,10 +5842,10 @@ func (ds *DropSequenceStatement) String() string {
 
 // CreateStatisticsStatement represents CREATE STATISTICS.
 type CreateStatisticsStatement struct {
-	Token      token.Token
-	Name       string
-	Table      *QualifiedIdentifier
-	Columns    []*Identifier
+	Token       token.Token
+	Name        string
+	Table       *QualifiedIdentifier
+	Columns     []*Identifier
 	WithOptions []string // FULLSCAN, SAMPLE n PERCENT, NORECOMPUTE, etc.
 }
 

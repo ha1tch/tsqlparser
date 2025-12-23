@@ -35,42 +35,42 @@ func Tokenize(input string) []token.Token {
 
 // Re-export types for convenience
 type (
-	Program   = ast.Program
-	Statement = ast.Statement
+	Program    = ast.Program
+	Statement  = ast.Statement
 	Expression = ast.Expression
-	Token     = token.Token
+	Token      = token.Token
 )
 
 // Statement types
 type (
-	SelectStatement             = ast.SelectStatement
-	InsertStatement             = ast.InsertStatement
-	UpdateStatement             = ast.UpdateStatement
-	DeleteStatement             = ast.DeleteStatement
-	DeclareStatement            = ast.DeclareStatement
-	SetStatement                = ast.SetStatement
-	IfStatement                 = ast.IfStatement
-	WhileStatement              = ast.WhileStatement
-	BeginEndBlock               = ast.BeginEndBlock
-	TryCatchStatement           = ast.TryCatchStatement
-	ReturnStatement             = ast.ReturnStatement
-	BreakStatement              = ast.BreakStatement
-	ContinueStatement           = ast.ContinueStatement
-	PrintStatement              = ast.PrintStatement
-	ExecStatement               = ast.ExecStatement
-	CreateProcedureStatement    = ast.CreateProcedureStatement
-	ThrowStatement              = ast.ThrowStatement
-	RaiserrorStatement          = ast.RaiserrorStatement
-	BeginTransactionStatement   = ast.BeginTransactionStatement
-	CommitTransactionStatement  = ast.CommitTransactionStatement
+	SelectStatement              = ast.SelectStatement
+	InsertStatement              = ast.InsertStatement
+	UpdateStatement              = ast.UpdateStatement
+	DeleteStatement              = ast.DeleteStatement
+	DeclareStatement             = ast.DeclareStatement
+	SetStatement                 = ast.SetStatement
+	IfStatement                  = ast.IfStatement
+	WhileStatement               = ast.WhileStatement
+	BeginEndBlock                = ast.BeginEndBlock
+	TryCatchStatement            = ast.TryCatchStatement
+	ReturnStatement              = ast.ReturnStatement
+	BreakStatement               = ast.BreakStatement
+	ContinueStatement            = ast.ContinueStatement
+	PrintStatement               = ast.PrintStatement
+	ExecStatement                = ast.ExecStatement
+	CreateProcedureStatement     = ast.CreateProcedureStatement
+	ThrowStatement               = ast.ThrowStatement
+	RaiserrorStatement           = ast.RaiserrorStatement
+	BeginTransactionStatement    = ast.BeginTransactionStatement
+	CommitTransactionStatement   = ast.CommitTransactionStatement
 	RollbackTransactionStatement = ast.RollbackTransactionStatement
-	WithStatement               = ast.WithStatement
-	GoStatement                 = ast.GoStatement
+	WithStatement                = ast.WithStatement
+	GoStatement                  = ast.GoStatement
 	// Stage 1: Table Infrastructure
-	CreateTableStatement    = ast.CreateTableStatement
-	DropTableStatement      = ast.DropTableStatement
-	TruncateTableStatement  = ast.TruncateTableStatement
-	AlterTableStatement     = ast.AlterTableStatement
+	CreateTableStatement   = ast.CreateTableStatement
+	DropTableStatement     = ast.DropTableStatement
+	TruncateTableStatement = ast.TruncateTableStatement
+	AlterTableStatement    = ast.AlterTableStatement
 	// Stage 2: Cursor Support
 	DeclareCursorStatement    = ast.DeclareCursorStatement
 	OpenCursorStatement       = ast.OpenCursorStatement
@@ -135,10 +135,10 @@ type (
 	// Stage 4a: OUTPUT and DML Enhancements
 	OutputClause = ast.OutputClause
 	// Stage 4b: MERGE Statement
-	MergeStatement   = ast.MergeStatement
-	MergeWhenClause  = ast.MergeWhenClause
-	MergeActionType  = ast.MergeActionType
-	MergeWhenType    = ast.MergeWhenType
+	MergeStatement  = ast.MergeStatement
+	MergeWhenClause = ast.MergeWhenClause
+	MergeActionType = ast.MergeActionType
+	MergeWhenType   = ast.MergeWhenType
 	// Stage 5: DDL Completion
 	CreateViewStatement     = ast.CreateViewStatement
 	AlterViewStatement      = ast.AlterViewStatement
@@ -153,15 +153,15 @@ type (
 	TriggerTiming           = ast.TriggerTiming
 	FunctionType            = ast.FunctionType
 	// Stage 6: Set Operations & Grouping
-	UnionClause    = ast.UnionClause
+	UnionClause     = ast.UnionClause
 	TupleExpression = ast.TupleExpression
 	// Stage 7a: Quick Wins
-	UseStatement                    = ast.UseStatement
-	WaitforStatement                = ast.WaitforStatement
-	SaveTransactionStatement        = ast.SaveTransactionStatement
-	GotoStatement                   = ast.GotoStatement
-	LabelStatement                  = ast.LabelStatement
-	SetOptionStatement              = ast.SetOptionStatement
+	UseStatement                     = ast.UseStatement
+	WaitforStatement                 = ast.WaitforStatement
+	SaveTransactionStatement         = ast.SaveTransactionStatement
+	GotoStatement                    = ast.GotoStatement
+	LabelStatement                   = ast.LabelStatement
+	SetOptionStatement               = ast.SetOptionStatement
 	SetTransactionIsolationStatement = ast.SetTransactionIsolationStatement
 
 	// Type conversion
@@ -176,8 +176,8 @@ type (
 	UnpivotTable = ast.UnpivotTable
 
 	// ALTER INDEX / BULK INSERT
-	AlterIndexStatement  = ast.AlterIndexStatement
-	BulkInsertStatement  = ast.BulkInsertStatement
+	AlterIndexStatement = ast.AlterIndexStatement
+	BulkInsertStatement = ast.BulkInsertStatement
 
 	// COLLATE and OPTION
 	CollateExpression = ast.CollateExpression

@@ -245,10 +245,10 @@ func (l *Lexer) NextToken() token.Token {
 		tok.Literal = l.readIdentifier()
 		tok.Type = token.LookupIdent(strings.ToUpper(tok.Literal))
 		// Check for compound keywords like END CONVERSATION, NEXT VALUE FOR, XML SCHEMA COLLECTION
-		if tok.Type == token.END || tok.Type == token.NEXT || tok.Type == token.XML || 
-		   tok.Type == token.ASYMMETRIC || tok.Type == token.SYMMETRIC ||
-		   tok.Type == token.TRUNCATE || tok.Type == token.WITH ||
-		   tok.Type == token.CREATE || tok.Type == token.BEGIN || tok.Type == token.IS {
+		if tok.Type == token.END || tok.Type == token.NEXT || tok.Type == token.XML ||
+			tok.Type == token.ASYMMETRIC || tok.Type == token.SYMMETRIC ||
+			tok.Type == token.TRUNCATE || tok.Type == token.WITH ||
+			tok.Type == token.CREATE || tok.Type == token.BEGIN || tok.Type == token.IS {
 			tok = l.checkCompoundKeyword(tok)
 		}
 		return tok
@@ -277,9 +277,9 @@ func (l *Lexer) NextToken() token.Token {
 			tok.Type = token.LookupIdent(strings.ToUpper(tok.Literal))
 			// Check for compound keywords like END CONVERSATION, NEXT VALUE FOR, XML SCHEMA COLLECTION
 			if tok.Type == token.END || tok.Type == token.NEXT || tok.Type == token.XML ||
-			   tok.Type == token.ASYMMETRIC || tok.Type == token.SYMMETRIC ||
-			   tok.Type == token.TRUNCATE || tok.Type == token.WITH ||
-			   tok.Type == token.CREATE || tok.Type == token.BEGIN || tok.Type == token.IS {
+				tok.Type == token.ASYMMETRIC || tok.Type == token.SYMMETRIC ||
+				tok.Type == token.TRUNCATE || tok.Type == token.WITH ||
+				tok.Type == token.CREATE || tok.Type == token.BEGIN || tok.Type == token.IS {
 				tok = l.checkCompoundKeyword(tok)
 			}
 			return tok
@@ -468,7 +468,7 @@ func (l *Lexer) readBlockComment() string {
 	position := l.position
 	l.readChar() // consume /
 	l.readChar() // consume *
-	
+
 	// T-SQL supports nested block comments
 	depth := 1
 	for depth > 0 {
@@ -772,7 +772,7 @@ func (l *Lexer) checkCompoundKeyword(tok token.Token) token.Token {
 		savedColumn2 := l.column
 
 		l.skipWhitespace()
-		
+
 		if l.ch == '(' {
 			l.readChar() // consume (
 			l.skipWhitespace()
