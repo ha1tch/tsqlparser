@@ -2389,6 +2389,13 @@ func (p *Parser) parseTableReference() ast.TableReference {
 				if p.expectPeek(token.LPAREN) {
 					table.Hints = p.parseTableHints()
 				}
+			} else if p.peekTokenIs(token.LPAREN) {
+				// Check for legacy hint syntax after alias: FROM table alias (NOLOCK)
+				// We need to distinguish from other uses of parentheses
+				if p.isLegacyTableHint() {
+					p.nextToken() // consume (
+					table.Hints = p.parseTableHints()
+				}
 			}
 
 			tableRef = table
