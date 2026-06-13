@@ -318,12 +318,20 @@ func (l *Lexer) readIdentifier() string {
 func (l *Lexer) readBracketedIdentifier() string {
 	l.readChar() // consume opening [
 	position := l.position
-	for l.ch != ']' && l.ch != 0 {
-		// Handle escaped brackets ]]
-		if l.ch == ']' && l.peekChar() == ']' {
+	for l.ch != 0 {
+		if l.ch == ']' {
+			if l.peekChar() == ']' {
+				// Escaped bracket: ]] represents a literal ] inside the identifier.
+				// Consume both ] characters and continue.
+				l.readChar()
+				l.readChar()
+			} else {
+				// Unescaped ] — end of identifier.
+				break
+			}
+		} else {
 			l.readChar()
 		}
-		l.readChar()
 	}
 	ident := l.input[position:l.position]
 	if l.ch == ']' {

@@ -619,7 +619,23 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 func (p *Parser) parseDotExpression(left ast.Expression) ast.Expression {
 	dotToken := p.curToken
 	p.nextToken()
-	
+
+	// Handle double-dot (empty database component in four-part name: server..schema.table)
+	if p.curTokenIs(token.DOT) {
+		empty := &ast.Identifier{Token: dotToken, Value: ""}
+		parts := []*ast.Identifier{}
+		if qi, ok := left.(*ast.QualifiedIdentifier); ok {
+			parts = append(parts, qi.Parts...)
+		} else if id, ok := left.(*ast.Identifier); ok {
+			parts = append(parts, id)
+		}
+		parts = append(parts, empty)
+		// Consume the second dot and the next identifier
+		p.nextToken() // move past second dot
+		parts = append(parts, &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal})
+		return &ast.QualifiedIdentifier{Parts: parts}
+	}
+
 	// Get the method/property name
 	methodName := p.curToken.Literal
 	
@@ -696,7 +712,19 @@ func (p *Parser) parseScopeExpression(left ast.Expression) ast.Expression {
 
 func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 	exp := &ast.FunctionCall{Token: p.curToken, Function: function}
-	exp.Arguments = p.parseExpressionList(token.RPAREN)
+	// Detect DISTINCT modifier: COUNT(DISTINCT x), SUM(DISTINCT x), etc.
+	// We are currently on '('; peek inside to see if DISTINCT follows.
+	if p.peekTokenIs(token.DISTINCT) {
+		exp.Distinct = true
+		p.nextToken() // consume (
+		p.nextToken() // consume DISTINCT
+		// Parse the remaining argument list starting from the current token.
+		// We have already advanced past ( and DISTINCT, so call the inner
+		// list parser directly rather than via parseExpressionList.
+		exp.Arguments = p.parseExpressionListInner(token.RPAREN)
+	} else {
+		exp.Arguments = p.parseExpressionList(token.RPAREN)
+	}
 
 	// Check for WITHIN GROUP clause (for ordered-set aggregate functions)
 	if p.peekTokenIs(token.WITHIN) {
@@ -739,11 +767,6 @@ func (p *Parser) parseExpressionList(end token.Type) []ast.Expression {
 
 	p.nextToken()
 
-	// Handle DISTINCT in aggregate functions
-	if p.curTokenIs(token.DISTINCT) {
-		p.nextToken()
-	}
-
 	expr := p.parseExpression(LOWEST)
 	
 	// Check for JSON key:value syntax (e.g., JSON_OBJECT('id':1))
@@ -777,6 +800,50 @@ func (p *Parser) parseExpressionList(end token.Type) []ast.Expression {
 			}
 		}
 		
+		list = append(list, expr)
+	}
+
+	if !p.expectPeek(end) {
+		return nil
+	}
+
+	return list
+}
+
+// parseExpressionListInner parses a comma-separated expression list where the
+// caller has already advanced past the opening delimiter and any leading modifier
+// (e.g. DISTINCT). curToken must be positioned on the first argument token.
+// Consumes up to and including the closing `end` token.
+func (p *Parser) parseExpressionListInner(end token.Type) []ast.Expression {
+	list := []ast.Expression{}
+
+	// Empty list: ( ) with nothing inside — curToken already at end
+	if p.curTokenIs(end) {
+		return list
+	}
+
+	expr := p.parseExpression(LOWEST)
+
+	// Check for JSON key:value syntax
+	if p.peekTokenIs(token.COLON) {
+		p.nextToken()
+		p.nextToken()
+		value := p.parseExpression(LOWEST)
+		expr = &ast.JsonKeyValuePair{Token: p.curToken, Key: expr, Value: value}
+	}
+
+	list = append(list, expr)
+
+	for p.peekTokenIs(token.COMMA) {
+		p.nextToken()
+		p.nextToken()
+		expr = p.parseExpression(LOWEST)
+		if p.peekTokenIs(token.COLON) {
+			p.nextToken()
+			p.nextToken()
+			value := p.parseExpression(LOWEST)
+			expr = &ast.JsonKeyValuePair{Token: p.curToken, Key: expr, Value: value}
+		}
 		list = append(list, expr)
 	}
 
@@ -2254,6 +2321,43 @@ func (p *Parser) parseTableReference() ast.TableReference {
 				funcName = strings.ToUpper(name.Parts[len(name.Parts)-1].Value)
 			}
 			
+			// Special handling for full-text table functions: structured signature
+			// CONTAINSTABLE/FREETEXTTABLE(table, col_or_collist, search_term [, top_n])
+			if funcName == "CONTAINSTABLE" || funcName == "FREETEXTTABLE" {
+				// Argument 1: table name
+				if !p.peekTokenIs(token.RPAREN) {
+					p.nextToken()
+					tvf.Arguments = append(tvf.Arguments, p.parseExpression(LOWEST))
+				}
+				// Argument 2: column or column list (col1, col2) or *
+				if p.peekTokenIs(token.COMMA) {
+					p.nextToken() // consume comma
+					p.nextToken() // move to column arg
+					if p.curTokenIs(token.LPAREN) {
+						// Column list: consume as raw identifiers to avoid grouped-expression issue
+						tuple := &ast.TupleExpression{Token: p.curToken}
+						p.nextToken() // move past (
+						for !p.curTokenIs(token.RPAREN) && !p.curTokenIs(token.EOF) {
+							tuple.Elements = append(tuple.Elements, &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal})
+							p.nextToken()
+							if p.curTokenIs(token.COMMA) {
+								p.nextToken()
+							}
+						}
+						// curToken is now ) — do NOT advance; let peekToken be the following comma
+						tvf.Arguments = append(tvf.Arguments, tuple)
+					} else {
+						tvf.Arguments = append(tvf.Arguments, p.parseExpression(LOWEST))
+					}
+				}
+				// Remaining arguments: search term, optional top_n, optional LANGUAGE
+				for p.peekTokenIs(token.COMMA) {
+					p.nextToken() // consume comma
+					p.nextToken() // move to argument
+					tvf.Arguments = append(tvf.Arguments, p.parseExpression(LOWEST))
+				}
+				p.expectPeek(token.RPAREN)
+			} else
 			// Special handling for OPENROWSET BULK syntax
 			if funcName == "OPENROWSET" && p.peekTokenIs(token.BULK) {
 				p.nextToken() // consume BULK
@@ -2942,8 +3046,14 @@ func (p *Parser) parseQualifiedIdentifier() *ast.QualifiedIdentifier {
 	qi.Parts = append(qi.Parts, &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal})
 
 	for p.peekTokenIs(token.DOT) {
-		p.nextToken()
-		p.nextToken()
+		p.nextToken() // consume dot
+		// Handle double-dot (empty database component): server..schema.table
+		if p.peekTokenIs(token.DOT) {
+			qi.Parts = append(qi.Parts, &ast.Identifier{Token: p.curToken, Value: ""})
+			// Leave the second dot in peekToken; next iteration will consume it
+			continue
+		}
+		p.nextToken() // consume next component
 		qi.Parts = append(qi.Parts, &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal})
 	}
 
@@ -4428,10 +4538,16 @@ func (p *Parser) parseExecStatement() ast.Statement {
 
 	stmt := &ast.ExecStatement{Token: execToken}
 
-	// Check for dynamic SQL: EXEC('sql')
+	// Check for dynamic SQL: EXEC('sql') or EXEC('sql', @param, ...) AT [server]
 	if p.curTokenIs(token.LPAREN) {
 		p.nextToken()
 		stmt.DynamicSQL = p.parseExpression(LOWEST)
+		// Consume any additional comma-separated parameters (e.g. EXEC AT parameterised form)
+		for p.peekTokenIs(token.COMMA) {
+			p.nextToken() // consume comma
+			p.nextToken() // move to parameter
+			p.parseExpression(LOWEST) // parse and discard
+		}
 		p.expectPeek(token.RPAREN)
 		
 		// Check for AT linked_server
@@ -4562,6 +4678,12 @@ func (p *Parser) parseResultSets() []*ast.ResultSetDefinition {
 					col.Nullable = false
 					col.HasNull = true
 				}
+			}
+
+			// Consume optional COLLATE collation_name
+			if p.peekTokenIs(token.COLLATE) {
+				p.nextToken() // consume COLLATE
+				p.nextToken() // consume collation name
 			}
 
 			rs.Columns = append(rs.Columns, col)
@@ -7903,6 +8025,19 @@ func (p *Parser) parseCreateSchemaStatement(createToken token.Token) ast.Stateme
 		p.nextToken()
 	}
 
+	// Skip deprecated inline object definitions: CREATE SCHEMA name CREATE TABLE ... CREATE VIEW ...
+	// This syntax is allowed by SQL Server for legacy compatibility but is not recommended.
+	for p.curTokenIs(token.CREATE) {
+		// Consume tokens until we hit a semicolon, GO, or EOF
+		for !p.curTokenIs(token.SEMICOLON) && !p.curTokenIs(token.GO) && !p.curTokenIs(token.EOF) {
+			p.nextToken()
+		}
+		// If we stopped at semicolon, consume it and check for another CREATE
+		if p.curTokenIs(token.SEMICOLON) {
+			p.nextToken()
+		}
+	}
+
 	return stmt
 }
 
@@ -8790,7 +8925,7 @@ func (p *Parser) parseContainsExpression() ast.Expression {
 	}
 	p.nextToken() // move past (
 	
-	// Parse column(s) - could be single column, (col1, col2), or *
+	// Parse column(s) - could be single column, (col1, col2), *, or PROPERTY(col, prop)
 	if p.curTokenIs(token.ASTERISK) {
 		expr.Columns = []string{"*"}
 		p.nextToken()
@@ -8806,9 +8941,29 @@ func (p *Parser) parseContainsExpression() ast.Expression {
 		}
 		p.nextToken() // move past )
 	} else {
-		// Single column
-		expr.Columns = []string{p.curToken.Literal}
-		p.nextToken()
+		// Single column (possibly qualified: t.col), or PROPERTY(col, 'prop') form
+		qi := p.parseQualifiedIdentifier()
+		colName := qi.String()
+		// Consume PROPERTY(...) or similar function-call column specifier
+		if p.peekTokenIs(token.LPAREN) {
+			p.nextToken() // move to (
+			depth := 1
+			p.nextToken()
+			for depth > 0 && !p.curTokenIs(token.EOF) {
+				if p.curTokenIs(token.LPAREN) {
+					depth++
+				} else if p.curTokenIs(token.RPAREN) {
+					depth--
+					if depth == 0 {
+						break
+					}
+				}
+				p.nextToken()
+			}
+			p.nextToken() // consume closing )
+		}
+		expr.Columns = []string{colName}
+		p.nextToken() // advance past the column argument to the comma
 	}
 	
 	// Expect comma
@@ -8943,7 +9098,7 @@ func (p *Parser) parseContainsTableExpression() ast.Expression {
 	return expr
 }
 
-// parseFreetextTableExpression parses FREETEXTTABLE(table, column, 'search term')
+// parseFreetextTableExpression parses FREETEXTTABLE(table, column, 'search term' [, top_n])
 func (p *Parser) parseFreetextTableExpression() ast.Expression {
 	expr := &ast.FreetextTableExpression{Token: p.curToken}
 	
@@ -8987,6 +9142,13 @@ func (p *Parser) parseFreetextTableExpression() ast.Expression {
 	
 	// Parse search term
 	expr.SearchTerm = p.parseExpression(LOWEST)
+	
+	// Consume optional top_n_by_rank and any other trailing arguments
+	for p.peekTokenIs(token.COMMA) {
+		p.nextToken() // consume comma
+		p.nextToken() // move to argument
+		p.parseExpression(LOWEST) // consume and discard
+	}
 	
 	if p.peekTokenIs(token.RPAREN) {
 		p.nextToken()
@@ -10578,11 +10740,41 @@ func (p *Parser) parseUseStatement() ast.Statement {
 func (p *Parser) parseWaitforStatement() ast.Statement {
 	stmt := &ast.WaitforStatement{Token: p.curToken}
 	p.nextToken()
-	
-	// DELAY or TIME
+
+	// Service Broker form: WAITFOR (RECEIVE ...) or WAITFOR (GET CONVERSATION GROUP ...)
+	// We do not model these statements fully; skip the parenthesised body and consume
+	// the optional ", TIMEOUT n" suffix.
+	if p.curTokenIs(token.LPAREN) {
+		stmt.Type = "RECEIVE"
+		depth := 1
+		p.nextToken() // move inside (
+		for depth > 0 && !p.curTokenIs(token.EOF) {
+			if p.curTokenIs(token.LPAREN) {
+				depth++
+			} else if p.curTokenIs(token.RPAREN) {
+				depth--
+				if depth == 0 {
+					break
+				}
+			}
+			p.nextToken()
+		}
+		p.nextToken() // consume closing )
+		// Optional: , TIMEOUT n
+		if p.curTokenIs(token.COMMA) {
+			p.nextToken() // consume comma
+			if strings.ToUpper(p.curToken.Literal) == "TIMEOUT" {
+				p.nextToken() // consume TIMEOUT
+				stmt.Duration = p.parseExpression(LOWEST) // consume timeout value
+			}
+		}
+		return stmt
+	}
+
+	// Standard form: WAITFOR DELAY value or WAITFOR TIME value
 	stmt.Type = strings.ToUpper(p.curToken.Literal)
 	p.nextToken()
-	
+
 	// Duration (string or variable)
 	stmt.Duration = p.parseExpression(LOWEST)
 	return stmt

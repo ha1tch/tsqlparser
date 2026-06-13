@@ -497,6 +497,7 @@ type FunctionCall struct {
 	Token       token.Token
 	Function    Expression
 	Arguments   []Expression
+	Distinct    bool           // True when DISTINCT modifier is present: COUNT(DISTINCT x)
 	WithinGroup []*OrderByItem // For WITHIN GROUP (ORDER BY ...) - ordered-set aggregates
 	Over        *OverClause
 }
@@ -508,7 +509,11 @@ func (fc *FunctionCall) String() string {
 	for _, a := range fc.Arguments {
 		args = append(args, a.String())
 	}
-	result := fc.Function.String() + "(" + strings.Join(args, ", ") + ")"
+	inner := strings.Join(args, ", ")
+	if fc.Distinct {
+		inner = "DISTINCT " + inner
+	}
+	result := fc.Function.String() + "(" + inner + ")"
 	if len(fc.WithinGroup) > 0 {
 		result += " WITHIN GROUP (ORDER BY "
 		var orderParts []string

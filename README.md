@@ -11,7 +11,8 @@ A T-SQL parser written in Go. Parses Microsoft SQL Server T-SQL syntax into an a
 - Control flow statements (IF/ELSE, WHILE, TRY/CATCH)
 - Transaction handling
 - XML and JSON operations
-- 96% pass rate on a corpus of 201 real-world T-SQL samples
+- `DISTINCT` modifier in aggregate functions (`COUNT(DISTINCT x)`, `SUM(DISTINCT x)`, etc.)
+- 99% pass rate on a corpus of 201 real-world T-SQL samples
 
 ## Installation
 
@@ -111,8 +112,8 @@ Access the library version programmatically:
 ```go
 import "github.com/ha1tch/tsqlparser/version"
 
-fmt.Println(version.Version)  // "0.5.0"
-fmt.Println(version.Full())   // "tsqlparser version 0.5.0"
+fmt.Println(version.Version)  // "0.6.0"
+fmt.Println(version.Full())   // "tsqlparser version 0.6.0"
 ```
 
 ## Testing
@@ -163,4 +164,4 @@ See <https://www.gnu.org/licenses/gpl-3.0.html> for the full license text.
 
 ## Contact
 
-h@ual.fi
+h@ual.li
