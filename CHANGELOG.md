@@ -4,6 +4,28 @@ All notable changes to tsqlparser are documented here.
 
 ---
 
+## [0.6.1] — 2026-07-17
+
+### Fixed
+
+- **`parseScopeExpression` nil-pointer panic** (`parser/parser.go`): when the
+  scope operator `::` was reached with no valid left operand — for example
+  after a preceding prefix expression failed to parse in inputs like
+  `(  ! ::` — the outer `parseExpression` passed a nil `left` into
+  `parseScopeExpression`, which then panicked on `left.String()`. The parser
+  now guards for `left == nil`, appends a consistent error to the parser's
+  error slice, and returns nil so recovery can continue. Discovered via xolu's
+  `FuzzEvalGuard` corpus.
+
+- **`SelectColumn.String` nil-pointer panic** (`ast/ast.go`): when
+  `parseSelectColumn` recovered from a syntax error and left `Expression` nil,
+  any subsequent stringification of the program (fmt `%v`, diagnostics, error
+  messages) would panic. `SelectColumn.String` now reports `<invalid>` (or
+  `varname = <invalid>` when the column is a variable assignment) instead of
+  panicking. Defensive complement to the parser fix above.
+
+---
+
 ## [0.6.0] — 2026-06-13
 
 ### Added

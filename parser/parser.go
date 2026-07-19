@@ -672,7 +672,19 @@ func (p *Parser) parseDotExpression(left ast.Expression) ast.Expression {
 // parseScopeExpression handles static method calls like GEOGRAPHY::Point(...)
 func (p *Parser) parseScopeExpression(left ast.Expression) ast.Expression {
 	scopeToken := p.curToken
-	
+
+	// Guard: the parser may reach an infix `::` with no valid left operand,
+	// for example when a preceding prefix expression failed to parse (input
+	// like "( ! ::"). In that case the outer parseExpression passed nil in.
+	// Calling any method on nil left panics, so surface an error and bail out
+	// consistently with the parser's existing error-collection style.
+	if left == nil {
+		p.errors = append(p.errors, fmt.Sprintf(
+			"line %d, col %d: `::` requires a type name on the left",
+			scopeToken.Line, scopeToken.Column))
+		return nil
+	}
+
 	// Get the type name from the left expression
 	var typeName string
 	if id, ok := left.(*ast.Identifier); ok {

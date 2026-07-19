@@ -929,6 +929,16 @@ func (sc SelectColumn) String() string {
 	if sc.AllColumns {
 		return "*"
 	}
+	// A malformed AST may leave Expression nil when parseSelectColumn recovered
+	// from a syntax error. Report the shape rather than panicking so callers
+	// can safely stringify partially-parsed programs (fmt %v, error messages,
+	// diagnostics).
+	if sc.Expression == nil {
+		if sc.Variable != nil {
+			return sc.Variable.Name + " = <invalid>"
+		}
+		return "<invalid>"
+	}
 	if sc.Variable != nil {
 		return sc.Variable.Name + " = " + sc.Expression.String()
 	}
